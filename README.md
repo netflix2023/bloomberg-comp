@@ -1,6 +1,7 @@
-# Bloomberg Market Data & Quantitative Automation Pipeline
+# bloomberg-comp: Bloomberg Market Data & Quantitative Trading Pipeline
 
-This workspace provides an automated Python environment configured to interface with the local Bloomberg Desktop API (`bbcomm.exe`) without requiring administrative rights.
+This repository provides an automated quantitative trading and screening pipeline configured to interface with the local Bloomberg Desktop API (`bbcomm.exe`) for the Dallas College Bloomberg Global Trading Challenge.
+
 
 ## System & Infrastructure Overview
 
