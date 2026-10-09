@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dallas College Bloomberg Trading Challenge — Decision Terminal</title>
+  <title>Dallas College Bloomberg Trading Terminal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #090d16;
-      --card-bg: #111726;
-      --card-border: #1e293b;
+      --bg-dark: #070a12;
+      --bg-surface: #0e1424;
+      --card-bg: #121a2d;
+      --card-border: #1e2c48;
       --accent-cyan: #00e5ff;
       --accent-green: #00e676;
       --accent-red: #ff3366;
@@ -19,6 +20,7 @@
       --accent-amber: #f59e0b;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
+      --text-dim: #64748b;
     }
     * {
       box-sizing: border-box;
@@ -29,295 +31,437 @@
       font-family: 'Plus Jakarta Sans', sans-serif;
       background-color: var(--bg-dark);
       color: var(--text-main);
-      padding: 24px;
+      margin: 0;
       line-height: 1.5;
+      min-height: 100vh;
     }
     .container {
-      max-width: 1440px;
+      max-width: 1480px;
       margin: 0 auto;
+      padding: 20px 24px 60px 24px;
     }
 
-    /* Top Mode & Diagnostic Banner */
+    /* Top Sticky Navigation Bar */
+    .top-nav-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(7, 10, 18, 0.94);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 12px 24px;
+      margin-bottom: 20px;
+    }
+    .nav-inner {
+      max-width: 1480px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #00e5ff 0%, #2563eb 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: #070a12;
+      box-shadow: 0 0 16px rgba(0, 229, 255, 0.35);
+    }
+    .brand-text h1 {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .brand-text p {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 600;
+    }
+
+    /* 3-View Page Switcher Tabs */
+    .page-switcher {
+      display: flex;
+      background: #090e1a;
+      border: 1px solid var(--card-border);
+      padding: 4px;
+      border-radius: 12px;
+      gap: 4px;
+    }
+    .nav-tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 18px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .nav-tab-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .nav-tab-btn.active {
+      background: linear-gradient(135deg, #121c32 0%, #1e293b 100%);
+      color: #ffffff;
+      border-color: rgba(0, 229, 255, 0.4);
+      box-shadow: 0 4px 16px rgba(0, 229, 255, 0.15);
+    }
+    .nav-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .nav-badge.invested {
+      background: rgba(0, 230, 118, 0.2);
+      color: var(--accent-green);
+      border: 1px solid rgba(0, 230, 118, 0.4);
+    }
+    .nav-badge.wishlist {
+      background: rgba(255, 179, 0, 0.2);
+      color: var(--accent-gold);
+      border: 1px solid rgba(255, 179, 0, 0.4);
+    }
+    .nav-badge.universe {
+      background: rgba(0, 229, 255, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-action-btn {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid var(--card-border);
+      color: #ffffff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .nav-action-btn:hover {
+      border-color: var(--accent-cyan);
+      background: rgba(37, 99, 235, 0.2);
+    }
+    .nav-action-btn.primary {
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      border: none;
+      font-weight: 700;
+    }
+
+    /* Mode Banner */
     .mode-banner {
       border-radius: 12px;
-      padding: 14px 20px;
+      padding: 12px 18px;
       margin-bottom: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
-      font-size: 13px;
-      transition: all 0.3s ease;
+      font-size: 12.5px;
     }
     .mode-banner.offline {
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(180, 83, 9, 0.2) 100%);
-      border: 1px solid rgba(245, 158, 11, 0.4);
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(180, 83, 9, 0.15) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.35);
       color: #fde68a;
     }
     .mode-banner.live {
-      background: linear-gradient(135deg, rgba(0, 230, 118, 0.1) 0%, rgba(5, 150, 105, 0.2) 100%);
-      border: 1px solid rgba(0, 230, 118, 0.4);
+      background: linear-gradient(135deg, rgba(0, 230, 118, 0.08) 0%, rgba(5, 150, 105, 0.15) 100%);
+      border: 1px solid rgba(0, 230, 118, 0.35);
       color: #a7f3d0;
-    }
-    .mode-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
     }
     .mode-pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 5px 12px;
+      padding: 4px 10px;
       border-radius: 9999px;
       font-weight: 800;
-      letter-spacing: 0.5px;
-      font-size: 12px;
+      font-size: 11px;
       text-transform: uppercase;
     }
-    .mode-pill.offline {
-      background: #f59e0b;
-      color: #090d16;
-    }
-    .mode-pill.live {
-      background: #00e676;
-      color: #090d16;
-    }
-    .pulse-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-    .pulse-dot.live {
-      background-color: #090d16;
-      box-shadow: 0 0 8px #ffffff;
-    }
-    .pulse-dot.offline {
-      background-color: #090d16;
-    }
-    .mode-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .diag-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #ffffff;
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .diag-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-    .sim-toggle {
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #ffffff;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      cursor: pointer;
-    }
+    .mode-pill.offline { background: #f59e0b; color: #090d16; }
+    .mode-pill.live { background: #00e676; color: #090d16; }
+    .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background-color: #090d16; }
+    .pulse-dot.live { box-shadow: 0 0 6px #ffffff; }
 
-    /* Header */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--card-border);
-      margin-bottom: 24px;
-    }
-    .title-group h1 {
-      font-size: 28px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #00e5ff 0%, #3b82f6 50%, #00e676 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 4px;
-    }
-    .title-group p {
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-
-    .header-badges {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 8px;
-    }
-    .sync-timestamp-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(0, 229, 255, 0.1);
-      border: 1px solid rgba(0, 229, 255, 0.3);
-      color: #ffffff;
-      padding: 8px 16px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .sync-timestamp-badge b {
-      color: var(--accent-cyan);
-    }
-    .age-pill {
-      background: rgba(255, 255, 255, 0.12);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 11px;
-      color: #94a3b8;
-    }
-    .feed-info-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #111726;
-      border: 1px solid var(--card-border);
-      color: var(--text-muted);
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    /* Top Stats Grid */
-    .stats-grid {
+    /* KPI Summary Strip */
+    .portfolio-kpi-strip {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
       margin-bottom: 24px;
     }
-    .stat-card {
+    .kpi-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 14px;
-      padding: 18px 20px;
+      padding: 16px 18px;
       display: flex;
       flex-direction: column;
       gap: 6px;
-      transition: transform 0.2s, border-color 0.2s;
+      position: relative;
+      overflow: hidden;
     }
-    .stat-card:hover {
-      transform: translateY(-2px);
-      border-color: #334155;
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.4), transparent);
     }
-    .stat-label {
-      font-size: 13px;
-      font-weight: 600;
+    .kpi-card.accent-green::before { background: linear-gradient(90deg, transparent, rgba(0, 230, 118, 0.6), transparent); }
+    .kpi-card.accent-gold::before { background: linear-gradient(90deg, transparent, rgba(255, 179, 0, 0.6), transparent); }
+    .kpi-label {
+      font-size: 11.5px;
+      font-weight: 700;
       color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .stat-value {
-      font-size: 28px;
+    .kpi-value {
+      font-size: 24px;
       font-weight: 800;
       font-family: 'JetBrains Mono', monospace;
       color: #ffffff;
     }
-    .stat-desc {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-    .input-box {
-      background: #090d16;
-      border: 1px solid #334155;
-      color: #00e5ff;
+    .kpi-subtext { font-size: 11.5px; color: var(--text-muted); }
+    .cash-input-field {
+      background: #070a12;
+      border: 1px solid #2d3748;
+      color: var(--accent-cyan);
       font-family: 'JetBrains Mono', monospace;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
-      padding: 6px 12px;
-      border-radius: 8px;
+      padding: 4px 8px;
+      border-radius: 6px;
       width: 100%;
       outline: none;
     }
-    .input-box:focus {
-      border-color: var(--accent-cyan);
-    }
 
-    /* How-To Guide Banner */
-    .guide-banner {
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(17, 23, 38, 0.9) 100%);
-      border: 1px solid #334155;
-      border-left: 4px solid var(--accent-cyan);
-      border-radius: 12px;
-      padding: 16px 22px;
+    /* Allocation Slots Visualizer */
+    .allocation-tracker-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 16px 20px;
       margin-bottom: 24px;
+    }
+    .tracker-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-    .guide-content h3 {
-      font-size: 15px;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 6px;
-    }
-    .guide-steps {
-      display: flex;
+      margin-bottom: 12px;
       flex-wrap: wrap;
       gap: 10px;
+    }
+    .tracker-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 900px) {
+      .slots-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    }
+    .slot-box {
+      background: rgba(7, 10, 18, 0.7);
+      border: 1px dashed var(--card-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .slot-box.occupied {
+      background: rgba(18, 28, 50, 0.9);
+      border: 1px solid rgba(0, 229, 255, 0.4);
+    }
+    .slot-num {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .slot-ticker {
+      font-size: 16px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      color: #ffffff;
+    }
+    .slot-ticker.empty {
+      color: var(--text-dim);
       font-size: 13px;
-      color: var(--text-muted);
+      font-weight: 600;
+      font-family: inherit;
     }
-    .step-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid #334155;
-      padding: 4px 10px;
-      border-radius: 6px;
-      color: #cbd5e1;
-    }
-    .step-chip b {
-      background: var(--accent-cyan);
-      color: #090d16;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    .slot-meta {
       font-size: 11px;
-    }
-    .step-chip code {
-      background: #090d16;
-      color: var(--accent-gold);
-      padding: 1px 5px;
-      border-radius: 4px;
+      color: var(--text-muted);
       font-family: 'JetBrains Mono', monospace;
     }
-    .guide-badge {
-      background: rgba(0, 229, 255, 0.15);
-      border: 1px solid rgba(0, 229, 255, 0.3);
-      color: var(--accent-cyan);
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 12px;
-      white-space: nowrap;
+
+    /* Subpage System */
+    .subpage {
+      display: none;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .subpage.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Controls */
-    .controls {
+    .section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .section-title-group h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title-group p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .official-tag {
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      color: var(--accent-cyan);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Empty States */
+    .empty-state-banner {
+      background: linear-gradient(135deg, rgba(14, 20, 36, 0.95) 0%, rgba(18, 26, 45, 0.95) 100%);
+      border: 1px dashed #283754;
+      border-radius: 18px;
+      padding: 50px 32px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       gap: 16px;
+      max-width: 760px;
+      margin: 32px auto;
+    }
+    .empty-icon-wrap {
+      width: 68px;
+      height: 68px;
+      border-radius: 18px;
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      color: var(--accent-cyan);
+    }
+    .empty-state-banner h3 { font-size: 20px; font-weight: 800; color: #ffffff; }
+    .empty-state-banner p { font-size: 14px; color: var(--text-muted); max-width: 580px; line-height: 1.6; }
+
+    /* Holdings Table */
+    .holdings-table-wrap {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .holdings-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .holdings-table th {
+      background: #0b1120;
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .holdings-table td {
+      padding: 16px;
+      border-bottom: 1px solid #162238;
+      vertical-align: middle;
+    }
+
+    /* Controls & Filter Tabs */
+    .controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
       margin-bottom: 24px;
     }
     .filter-tabs {
@@ -329,18 +473,18 @@
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       color: var(--text-muted);
-      padding: 8px 16px;
-      border-radius: 10px;
-      font-size: 13px;
+      padding: 7px 14px;
+      border-radius: 9px;
+      font-size: 12.5px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
     }
     .filter-btn:hover, .filter-btn.active {
-      background: #1e293b;
+      background: #1a253d;
       color: #ffffff;
       border-color: var(--accent-cyan);
-      box-shadow: 0 0 12px rgba(0, 229, 255, 0.15);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.15);
     }
     .search-box-wrapper {
       position: relative;
@@ -351,54 +495,51 @@
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       color: #ffffff;
-      padding: 10px 16px 10px 38px;
+      padding: 9px 16px 9px 36px;
       border-radius: 10px;
-      font-size: 14px;
+      font-size: 13.5px;
       outline: none;
       width: 280px;
-      transition: border-color 0.2s;
     }
-    .search-box:focus {
-      border-color: var(--accent-cyan);
-    }
+    .search-box:focus { border-color: var(--accent-cyan); }
     .search-icon {
       position: absolute;
       left: 12px;
       color: var(--text-muted);
-      font-size: 14px;
+      font-size: 13px;
       pointer-events: none;
     }
 
-    /* Stock Cards Grid - Fixed Overflow & Clean Header */
+    /* Card Grid */
     .stocks-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 20px;
+      gap: 18px;
     }
     .stock-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 16px;
-      padding: 20px;
+      padding: 18px 20px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 13px;
       position: relative;
       transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
       overflow: hidden;
     }
     .stock-card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-3px);
       border-color: #3b82f6;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
     }
-
-    /* Card Header: 2 Clean Rows to prevent any badge overflow */
-    .card-header {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+    .stock-card.is-wishlist {
+      border-color: rgba(255, 179, 0, 0.5);
+      background: linear-gradient(135deg, rgba(18, 26, 45, 0.95) 0%, rgba(28, 24, 15, 0.95) 100%);
     }
+
+    /* Card Header */
+    .card-header { display: flex; flex-direction: column; gap: 4px; }
     .header-main-row {
       display: flex;
       justify-content: space-between;
@@ -406,37 +547,24 @@
       gap: 8px;
     }
     .ticker-symbol {
-      font-size: 22px;
+      font-size: 21px;
       font-weight: 800;
       color: #ffffff;
       letter-spacing: 0.5px;
       font-family: 'JetBrains Mono', monospace;
     }
     .signal-pill {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 800;
-      padding: 4px 8px;
+      padding: 3px 8px;
       border-radius: 6px;
       text-transform: uppercase;
       letter-spacing: 0.4px;
       white-space: nowrap;
-      text-align: right;
     }
-    .signal-pill.success {
-      background: rgba(0, 230, 118, 0.15);
-      color: var(--accent-green);
-      border: 1px solid rgba(0, 230, 118, 0.4);
-    }
-    .signal-pill.primary {
-      background: rgba(0, 229, 255, 0.15);
-      color: var(--accent-cyan);
-      border: 1px solid rgba(0, 229, 255, 0.4);
-    }
-    .signal-pill.secondary {
-      background: rgba(148, 163, 184, 0.15);
-      color: var(--text-muted);
-      border: 1px solid rgba(148, 163, 184, 0.3);
-    }
+    .signal-pill.success { background: rgba(0, 230, 118, 0.15); color: var(--accent-green); border: 1px solid rgba(0, 230, 118, 0.4); }
+    .signal-pill.primary { background: rgba(0, 229, 255, 0.15); color: var(--accent-cyan); border: 1px solid rgba(0, 229, 255, 0.4); }
+    .signal-pill.secondary { background: rgba(148, 163, 184, 0.15); color: var(--text-muted); border: 1px solid rgba(148, 163, 184, 0.3); }
 
     .header-sub-row {
       display: flex;
@@ -457,131 +585,153 @@
       font-size: 10px;
       font-weight: 700;
       color: #94a3b8;
-      background: #1e293b;
+      background: #1e2c48;
       padding: 2px 7px;
       border-radius: 5px;
       text-transform: uppercase;
       white-space: nowrap;
-      letter-spacing: 0.3px;
     }
 
-    /* Price Row with High Contrast */
+    /* Price Row */
     .price-row {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #1e293b;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #1a263e;
     }
     .current-price {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 800;
       font-family: 'JetBrains Mono', monospace;
       color: #ffffff;
     }
-    .price-tag-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .state-badge {
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: 'JetBrains Mono', monospace;
-      text-transform: uppercase;
-    }
-    .state-badge.offline {
-      background: rgba(245, 158, 11, 0.2);
-      color: #f59e0b;
-      border: 1px solid rgba(245, 158, 11, 0.4);
-    }
-    .state-badge.live {
-      background: rgba(0, 230, 118, 0.2);
-      color: #00e676;
-      border: 1px solid rgba(0, 230, 118, 0.4);
-    }
     .change-pct {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 700;
       font-family: 'JetBrains Mono', monospace;
     }
     .change-pct.pos { color: var(--accent-green); }
     .change-pct.neg { color: #ff3366; }
 
-    /* Tinted Metrics Box for Institutional Look */
+    /* Metrics Box */
     .metric-rows {
       display: flex;
       flex-direction: column;
       gap: 6px;
-      background: rgba(9, 13, 22, 0.6);
-      padding: 12px 14px;
+      background: rgba(7, 10, 18, 0.6);
+      padding: 11px 13px;
       border-radius: 10px;
-      border: 1px solid #1e293b;
+      border: 1px solid #1a263e;
     }
     .metric-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 12.5px;
+      font-size: 12px;
     }
-    .metric-row .label {
-      color: var(--text-muted);
-    }
-    .metric-row .val {
-      font-weight: 700;
-      font-family: 'JetBrains Mono', monospace;
-    }
+    .metric-row .label { color: var(--text-muted); }
+    .metric-row .val { font-weight: 700; font-family: 'JetBrains Mono', monospace; }
     .val-highlight { color: var(--accent-green); }
     .val-stop { color: #ff3366; }
 
-    .trade-btn {
-      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
-      color: #ffffff;
-      border: none;
-      padding: 12px;
-      border-radius: 10px;
+    .wishlist-notes-box {
+      font-size: 11.5px;
+      color: #cbd5e1;
+      background: rgba(18, 28, 50, 0.5);
+      border-left: 3px solid var(--accent-gold);
+      padding: 6px 10px;
+      border-radius: 4px;
+      line-height: 1.4;
+    }
+
+    /* Card Actions */
+    .card-actions {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin-top: 2px;
+    }
+    .add-wish-btn {
+      background: linear-gradient(135deg, rgba(255, 179, 0, 0.15) 0%, rgba(245, 158, 11, 0.25) 100%);
+      border: 1px solid rgba(255, 179, 0, 0.5);
+      color: var(--accent-gold);
+      padding: 10px 14px;
+      border-radius: 9px;
       font-weight: 700;
-      font-size: 13px;
+      font-size: 12.5px;
       cursor: pointer;
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 8px;
-      transition: filter 0.2s, transform 0.1s;
-      margin-top: 2px;
+      gap: 6px;
+      transition: all 0.2s;
     }
-    .trade-btn:hover {
-      filter: brightness(1.15);
+    .add-wish-btn:hover {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #070a12;
+      border-color: #f59e0b;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
     }
-    .trade-btn:active {
-      transform: scale(0.98);
+    .add-wish-btn.active {
+      background: rgba(0, 230, 118, 0.15);
+      border-color: rgba(0, 230, 118, 0.5);
+      color: var(--accent-green);
     }
+    .ticket-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      color: #cbd5e1;
+      padding: 10px 14px;
+      border-radius: 9px;
+      font-weight: 600;
+      font-size: 12.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .ticket-btn:hover { background: rgba(255, 255, 255, 0.18); color: #ffffff; }
 
-    /* Diagnostic Modal */
+    .remove-btn {
+      background: rgba(255, 51, 102, 0.12);
+      border: 1px solid rgba(255, 51, 102, 0.35);
+      color: #ff6688;
+      padding: 10px 14px;
+      border-radius: 9px;
+      font-weight: 700;
+      font-size: 12.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: center;
+    }
+    .remove-btn:hover { background: rgba(255, 51, 102, 0.25); color: #ffffff; }
+
+    /* Modals */
     .modal-overlay {
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(5px);
+      background: rgba(0, 0, 0, 0.84);
+      backdrop-filter: blur(6px);
       z-index: 200;
       align-items: center;
       justify-content: center;
       padding: 20px;
     }
     .modal-card {
-      background: var(--card-bg);
-      border: 1px solid #334155;
-      border-radius: 16px;
+      background: var(--bg-surface);
+      border: 1px solid #2d3e5e;
+      border-radius: 18px;
       max-width: 580px;
       width: 100%;
-      padding: 28px;
+      padding: 26px;
       display: flex;
       flex-direction: column;
       gap: 16px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+      box-shadow: 0 24px 50px rgba(0,0,0,0.8);
+      max-height: 90vh;
+      overflow-y: auto;
     }
     .modal-title {
       display: flex;
@@ -597,54 +747,81 @@
       color: var(--text-muted);
       font-size: 26px;
       cursor: pointer;
+      line-height: 1;
     }
-    .diag-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-    .diag-table td {
-      padding: 8px 10px;
-      border-bottom: 1px solid #1e293b;
-    }
-    .diag-table td:first-child {
+    .modal-form-group { display: flex; flex-direction: column; gap: 6px; }
+    .modal-form-label {
+      font-size: 12px;
+      font-weight: 700;
       color: var(--text-muted);
-      font-weight: 600;
-      width: 40%;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-    .diag-table td:last-child {
-      font-family: 'JetBrains Mono', monospace;
+    .modal-input {
+      background: #070a12;
+      border: 1px solid #2d3e5e;
       color: #ffffff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      outline: none;
     }
-
-    /* Order Ticket Box */
+    .modal-input:focus { border-color: var(--accent-cyan); }
     .ticket-box {
-      background: #090d16;
-      border: 1px solid #1e293b;
+      background: #070a12;
+      border: 1px solid #1a263e;
       border-radius: 10px;
-      padding: 16px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 9px;
+      gap: 8px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
+      font-size: 12.5px;
     }
-    .ticket-line {
-      display: flex;
-      justify-content: space-between;
-    }
-    .copy-btn {
-      background: var(--accent-cyan);
-      color: #090d16;
+    .ticket-line { display: flex; justify-content: space-between; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 8px; }
+    .modal-confirm-btn {
+      flex: 1;
+      background: linear-gradient(135deg, #00c853 0%, #00e676 100%);
+      color: #070a12;
       border: none;
       padding: 12px;
       border-radius: 10px;
-      font-weight: 700;
-      cursor: pointer;
+      font-weight: 800;
       font-size: 14px;
+      cursor: pointer;
+    }
+    .modal-cancel-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      color: #cbd5e1;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
     }
 
-    /* Footer */
+    /* Toast */
+    .toast-notify {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #111a2f;
+      border: 1px solid var(--accent-cyan);
+      color: #ffffff;
+      padding: 14px 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      gap: 10px;
+      z-index: 300;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
     .terminal-footer {
       margin-top: 48px;
       padding-top: 24px;
@@ -662,6 +839,42 @@
 </head>
 <body>
 
+<!-- TOP STICKY NAVIGATION BAR -->
+<nav class="top-nav-bar">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <div class="brand-logo">B</div>
+      <div class="brand-text">
+        <h1>Dallas College Bloomberg Terminal</h1>
+        <p>Global Trading Challenge • 20% Position Cap</p>
+      </div>
+    </div>
+
+    <!-- 3-VIEW PAGE SWITCHER TABS -->
+    <div class="page-switcher">
+      <button class="nav-tab-btn active" id="tabBtnHoldings" onclick="switchPage('holdings')">
+        <span>💼 Current Holdings</span>
+        <span class="nav-badge invested" id="badgeCountInvested">0</span>
+      </button>
+      <button class="nav-tab-btn" id="tabBtnWishlist" onclick="switchPage('wishlist')">
+        <span>⭐ Team Wishlist</span>
+        <span class="nav-badge wishlist" id="badgeCountWishlist">0</span>
+      </button>
+      <button class="nav-tab-btn" id="tabBtnUniverse" onclick="switchPage('universe')">
+        <span>🔍 Screener Universe</span>
+        <span class="nav-badge universe" id="badgeCountUniverse">25</span>
+      </button>
+    </div>
+
+    <!-- TOP ACTIONS -->
+    <div class="nav-right">
+      <button class="nav-action-btn primary" onclick="openAddCustomModal()">➕ Add Custom Ticker</button>
+      <button class="nav-action-btn" id="syncBtn" onclick="triggerServerSync()">🔄 Sync Bloomberg</button>
+      <button class="nav-action-btn" onclick="openDiagModal()">📡 Diagnostics</button>
+    </div>
+  </div>
+</nav>
+
 <div class="container">
 
   <!-- TOP LIVE VS OFFLINE STATUS BANNER -->
@@ -672,265 +885,479 @@
         <span id="modeText">OFFLINE SNAPSHOT</span>
       </div>
       <div>
-        <span id="bannerSummary"><b>Last Synced:</b> October 09, 2026 at 03:11 PM (<span id="bannerAgeText">5 mins ago</span>) • Bloomberg API: <b>Offline</b></span>
+        <span id="bannerSummary"><b>Last Synced:</b> October 09, 2026 at 03:43 PM (<span id="bannerAgeText">Just now</span>) • Bloomberg API: <b>Offline</b></span>
       </div>
     </div>
-    <div class="mode-right">
-      <button class="diag-btn" onclick="openDiagModal()">🔍 Feed & API Diagnostics</button>
-      <button class="diag-btn" onclick="window.location.reload()">🔄 Refresh Feed</button>
-      <button class="sim-toggle" onclick="toggleSimulatedMode()">Toggle View Mode</button>
+    <div class="mode-right" style="display: flex; gap: 8px;">
+      <button class="nav-action-btn" style="padding: 5px 10px; font-size: 11.5px;" onclick="triggerServerSync()">🔄 Run Live Sync</button>
     </div>
   </div>
 
-  <!-- Main Header with Permanent Last Synced Badge -->
-  <div class="header">
-    <div class="title-group">
-      <h1>Bloomberg Global Trading Challenge — Dallas College</h1>
-      <p>Quantitative Decision, Risk-Reward & 20% Position-Sizing Terminal</p>
-    </div>
-    <div class="header-badges">
-      <div class="sync-timestamp-badge">
-        <span>🕒 Last Synced: <b id="headerSyncTime">October 09, 2026 at 03:11 PM</b></span>
-        <span id="headerSyncAge" class="age-pill">(5 mins ago)</span>
+  <!-- PORTFOLIO KPI SUMMARY STRIP -->
+  <div class="portfolio-kpi-strip">
+    <div class="kpi-card">
+      <div class="kpi-label">
+        <span>Total Portfolio Cash ($)</span>
+        <span style="font-size: 10px; color: var(--accent-cyan);">SIMULATOR</span>
       </div>
-      <div class="feed-info-tag">
-        <span>Protocol: <b>BLPAPI (127.0.0.1:8194)</b></span>
-        <span style="color: #475569;">|</span>
-        <span id="feedStatusLabel">Status: <b>Live Feed</b></span>
+      <input type="number" id="cashInput" class="cash-input-field" value="1000000" oninput="recalculateAll()">
+      <div class="kpi-subtext">Challenge competition equity</div>
+    </div>
+    <div class="kpi-card accent-green">
+      <div class="kpi-label">Total Portfolio Value</div>
+      <div class="kpi-value" id="kpiTotalEquity" style="color: var(--accent-green);">$1,000,000</div>
+      <div class="kpi-subtext" id="kpiUnrealizedText">Unrealized P&L: +$0.00 (0.0%)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Available Cash ($)</div>
+      <div class="kpi-value" id="kpiCashAvailable" style="color: var(--accent-cyan);">$1,000,000</div>
+      <div class="kpi-subtext" id="kpiInvestedText">Invested: $0 (0.0% deployed)</div>
+    </div>
+    <div class="kpi-card accent-gold">
+      <div class="kpi-label">Max 20% Entry Limit</div>
+      <div class="kpi-value" id="kpiMaxCap" style="color: var(--accent-gold);">$200,000</div>
+      <div class="kpi-subtext">Max allowable per position clip</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Allocation Slots Used</div>
+      <div class="kpi-value" id="kpiSlotsText" style="color: #ffffff;">0 / 5</div>
+      <div class="kpi-subtext" id="kpiSlotsDesc">5 clips open (100% capacity)</div>
+    </div>
+  </div>
+
+  <!-- 5-SLOT ALLOCATION TRACKER -->
+  <div class="allocation-tracker-card">
+    <div class="tracker-header">
+      <div class="tracker-title">
+        <span>🎯 Official 20% Position Sizing Slots (5 Max Clips)</span>
+        <span class="official-tag">Bloomberg CHAL &lt;GO&gt; Synced</span>
+      </div>
+      <span style="font-size: 12px; color: var(--accent-cyan); font-family: 'JetBrains Mono', monospace;" id="trackerAllocPercent">0.0% / 100.0% Allocated</span>
+    </div>
+    <div class="slots-grid" id="slotsGrid"></div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- VIEW 1: CURRENT HOLDINGS (OFFICIAL BLOOMBERG PORTFOLIO)           -->
+  <!-- ================================================================= -->
+  <div class="subpage active" id="subpageHoldings">
+    <div class="section-header">
+      <div class="section-title-group">
+        <h2>
+          <span>💼 Official Current Holdings</span>
+          <span class="official-tag">Read-Only • Terminal Synced</span>
+        </h2>
+        <p>Live portfolio actively held in your team's Bloomberg Terminal account. Positions cannot be manually created here — they automatically sync from Bloomberg executions.</p>
+      </div>
+      <div>
+        <button class="nav-action-btn primary" onclick="switchPage('universe')">🔍 Browse 25 Screener Equities</button>
       </div>
     </div>
-  </div>
 
-  <!-- Top Stats Grid -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-label">Total Portfolio Cash ($)</div>
-      <input type="number" id="cashInput" class="input-box" value="1000000" oninput="updateSizing()">
-      <div class="stat-desc">Type your balance to recalculate all 20% positions</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Max 20% Entry Limit</div>
-      <div class="stat-value" id="maxCapDisplay" style="color: var(--accent-cyan);">$200,000</div>
-      <div class="stat-desc">Mandatory competition limit per position</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Max Risk / Stop Budget</div>
-      <div class="stat-value" id="riskBudgetDisplay" style="color: var(--accent-gold);">$14,000</div>
-      <div class="stat-desc">Max loss on a 20% clip using strict 7% stop</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Winning Expectancy Edge</div>
-      <div class="stat-value" style="color: var(--accent-green);">3:1 Ratio</div>
-      <div class="stat-desc">40% win rate yields positive compounding</div>
-    </div>
-  </div>
-
-  <!-- Beginner Guide Banner with 3 Clean Steps -->
-  <div class="guide-banner">
-    <div class="guide-content">
-      <h3>🚀 How To Execute Competition Trades</h3>
-      <div class="guide-steps">
-        <span class="step-chip"><b>1</b> Screen candidates with 3:1+ R:R & Target Upside</span>
-        <span class="step-chip"><b>2</b> Click "Generate 20% Trade Ticket" for share counts</span>
-        <span class="step-chip"><b>3</b> Execute in terminal via <code>CHAL &lt;GO&gt;</code></span>
+    <!-- READ-ONLY EMPTY HOLDINGS BANNER -->
+    <div class="empty-state-banner" id="emptyHoldingsCard">
+      <div class="empty-icon-wrap">💼</div>
+      <h3>0 Active Bloomberg Positions</h3>
+      <p>
+        Your team currently has <b>0 invested positions</b> in the Bloomberg Challenge terminal. 
+        Your portfolio is <b>100% Cash ($1,000,000 Liquid)</b> with all <b>5 allocation slots open</b> ($200,000 max entry per clip).
+      </p>
+      <div style="background: rgba(14, 20, 36, 0.8); border: 1px solid var(--card-border); padding: 12px 18px; border-radius: 10px; font-size: 13px; color: var(--text-muted); text-align: left; max-width: 580px;">
+        💡 <b>How holdings update:</b><br>
+        1. Browse the <b>Screener Universe</b> or add candidates to your <b>Wishlist</b>.<br>
+        2. Click <b>"Generate 20% Order Ticket"</b> to copy the pre-sized order parameters.<br>
+        3. Execute the order on the Bloomberg Terminal in `CHAL &lt;GO&gt;`.<br>
+        4. Run sync — your real Bloomberg position will automatically appear here with live P&L and 7% hard stop alerts.
+      </div>
+      <div style="margin-top: 8px; display: flex; gap: 10px;">
+        <button class="nav-action-btn primary" style="padding: 10px 22px; font-size: 14px;" onclick="switchPage('universe')">🔍 Browse Screener Universe</button>
+        <button class="nav-action-btn" style="padding: 10px 18px; font-size: 14px;" onclick="switchPage('wishlist')">⭐ View Team Wishlist</button>
       </div>
     </div>
-    <div class="guide-badge">20% Position Cap Enforced</div>
+
+    <!-- HOLDINGS TABLE (Visible when positions exist in current_holdings.json) -->
+    <div class="holdings-table-wrap" id="holdingsTableWrap" style="display: none;">
+      <table class="holdings-table">
+        <thead>
+          <tr>
+            <th>Security / Sector</th>
+            <th>Shares Held</th>
+            <th>Entry Price</th>
+            <th>Current Quote</th>
+            <th>Market Value</th>
+            <th>Unrealized P&L</th>
+            <th>Portfolio %</th>
+            <th>Strict 7% Stop</th>
+            <th>Catalyst Date</th>
+          </tr>
+        </thead>
+        <tbody id="holdingsTableBody"></tbody>
+      </table>
+    </div>
   </div>
 
-  <!-- Controls -->
-  <div class="controls">
-    <div class="filter-tabs">
-      <button class="filter-btn active" onclick="filterSector('ALL', this)">All Stocks (25)</button>
-      <button class="filter-btn" onclick="filterSector('Information Technology', this)">AI & Tech</button>
-      <button class="filter-btn" onclick="filterSector('Health Care', this)">Healthcare / Pharma</button>
-      <button class="filter-btn" onclick="filterSector('Industrials', this)">Industrials</button>
-      <button class="filter-btn" onclick="filterSector('Financials', this)">Financials</button>
-      <button class="filter-btn" onclick="filterSector('Consumer', this)">Consumer</button>
+  <!-- ================================================================= -->
+  <!-- VIEW 2: TEAM WISHLIST (EMPTY BY DEFAULT — ADDABLE & REMOVABLE)   -->
+  <!-- ================================================================= -->
+  <div class="subpage" id="subpageWishlist">
+    <div class="section-header">
+      <div class="section-title-group">
+        <h2>
+          <span>⭐ Team Prospective Wishlist</span>
+          <span style="font-size: 12px; font-weight: 700; color: var(--accent-gold); background: rgba(255, 179, 0, 0.15); padding: 3px 8px; border-radius: 6px;" id="wishlistCountHeader">0 Saved</span>
+        </h2>
+        <p>Curated equities your team hopes to invest in. Easily add stocks from the Screener Universe or custom tickers, and click <b>"📋 Order Ticket"</b> for pre-sized 20% entry parameters.</p>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button class="nav-action-btn primary" onclick="switchPage('universe')">🔍 Browse 25 Screener Equities</button>
+        <button class="nav-action-btn" onclick="openAddCustomModal()">➕ Custom Ticker</button>
+      </div>
     </div>
-    <div class="search-box-wrapper">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" class="search-box" placeholder="Search ticker or company..." oninput="searchStocks()">
+
+    <!-- EMPTY WISHLIST BANNER (Default State) -->
+    <div class="empty-state-banner" id="emptyWishlistCard" style="display: none;">
+      <div class="empty-icon-wrap" style="color: var(--accent-gold); border-color: rgba(255, 179, 0, 0.4); background: rgba(255, 179, 0, 0.1);">⭐</div>
+      <h3>Your Team Wishlist is Currently Empty</h3>
+      <p>
+        You have not added any stocks to your wishlist yet. 
+        Browse the <b>25 Screener Equities</b> and click <b>"⭐ Add to Wishlist"</b> on any stock your team hopes to invest in.
+      </p>
+      <div style="margin-top: 6px;">
+        <button class="nav-action-btn primary" style="padding: 10px 24px; font-size: 14px;" onclick="switchPage('universe')">🔍 Browse 25 Screener Stocks to Add</button>
+      </div>
     </div>
+
+    <!-- WISHLIST CARDS GRID (Populated by user clicks) -->
+    <div class="stocks-grid" id="wishlistGrid"></div>
   </div>
 
-  <!-- Stock Cards Grid -->
-  <div class="stocks-grid" id="stocksGrid"></div>
+  <!-- ================================================================= -->
+  <!-- VIEW 3: SCREENER UNIVERSE (25 STOCKS KEPT UP TO VIEW)             -->
+  <!-- ================================================================= -->
+  <div class="subpage" id="subpageUniverse">
+    <div class="section-header">
+      <div class="section-title-group">
+        <h2>
+          <span>🔍 Bloomberg 25-Stock Screener Universe</span>
+        </h2>
+        <p>All 25 institutional candidates available to view with live Bloomberg quotes, Wall St targets, and 3:1+ R:R. Click <b>"⭐ Add to Wishlist"</b> on any stock to add it to your team's wishlist.</p>
+      </div>
+      <div>
+        <span style="font-size: 13px; color: var(--accent-cyan); font-family: 'JetBrains Mono', monospace;">25 Institutional Equities</span>
+      </div>
+    </div>
 
-  <!-- Footer with Permanent Timestamp Stamp -->
+    <!-- Filter & Search Controls -->
+    <div class="controls-bar">
+      <div class="filter-tabs">
+        <button class="filter-btn active" onclick="filterSector('ALL', this)">All Universe (25)</button>
+        <button class="filter-btn" onclick="filterSector('Information Technology', this)">AI & Tech</button>
+        <button class="filter-btn" onclick="filterSector('Health Care', this)">Healthcare / Pharma</button>
+        <button class="filter-btn" onclick="filterSector('Industrials', this)">Industrials</button>
+        <button class="filter-btn" onclick="filterSector('Financials', this)">Financials</button>
+        <button class="filter-btn" onclick="filterSector('Consumer', this)">Consumer</button>
+        <button class="filter-btn" onclick="filterSector('Energy', this)">Energy</button>
+      </div>
+      <div class="search-box-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="universeSearchInput" class="search-box" placeholder="Search ticker or company..." oninput="searchUniverse()">
+      </div>
+    </div>
+
+    <!-- Universe Cards Grid -->
+    <div class="stocks-grid" id="universeGrid"></div>
+  </div>
+
+  <!-- Footer -->
   <footer class="terminal-footer">
     <div>Dallas College Bloomberg Global Trading Challenge • WLS Index Universe</div>
-    <div>Data Engine: <b>Bloomberg BLPAPI (127.0.0.1:8194)</b></div>
-    <div>Last Terminal Extraction: <b style="color: var(--accent-cyan);">October 09, 2026 at 03:11 PM</b></div>
+    <div>Engine: <b>BLPAPI (127.0.0.1:8194)</b> • Localhost Active</div>
+    <div>Last Market Extraction: <b style="color: var(--accent-cyan);">October 09, 2026 at 03:43 PM</b></div>
   </footer>
 </div>
 
-<!-- Diagnostics Modal -->
+<!-- ================================================================= -->
+<!-- MODALS                                                            -->
+<!-- ================================================================= -->
+
+<!-- 1. CUSTOM TICKER MODAL -->
+<div class="modal-overlay" id="customTickerModal" onclick="closeModalOnBg(event, 'customTickerModal')">
+  <div class="modal-card">
+    <div class="modal-title">
+      <span>➕ Add Custom Ticker to Wishlist</span>
+      <button class="close-btn" onclick="closeCustomTickerModal()">&times;</button>
+    </div>
+    <p style="font-size: 13px; color: var(--text-muted);">
+      Enter any stock symbol outside the 25 screener names:
+    </p>
+
+    <div class="modal-form-group">
+      <label class="modal-form-label">Ticker Symbol</label>
+      <input type="text" id="customTickerInput" class="modal-input" placeholder="e.g. PLTR, TSM, SMCI" style="text-transform: uppercase;">
+    </div>
+
+    <div class="modal-form-group">
+      <label class="modal-form-label">Investment Thesis / Catalyst Note</label>
+      <input type="text" id="customNotesInput" class="modal-input" placeholder="e.g. Q3 earnings momentum / hyperscaler custom silicon">
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-confirm-btn" onclick="confirmAddCustom()">Add to Wishlist</button>
+      <button class="modal-cancel-btn" onclick="closeCustomTickerModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- 2. ORDER TICKET MODAL FOR CHAL <GO> -->
+<div class="modal-overlay" id="tradeModal" onclick="closeModalOnBg(event, 'tradeModal')">
+  <div class="modal-card">
+    <div class="modal-title">
+      <span id="modalTickerTitle">Trade Order Ticket (CHAL &lt;GO&gt;)</span>
+      <button class="close-btn" onclick="closeModal()">&times;</button>
+    </div>
+    <p style="font-size: 13px; color: var(--text-muted);">
+      Pre-sized strictly to the 20% competition rule. Copy and punch into the Bloomberg simulator:
+    </p>
+    <div class="ticket-box" id="ticketBox"></div>
+    <button class="nav-action-btn primary" id="copyBtn" style="width: 100%; justify-content: center; padding: 12px; font-size: 13.5px;" onclick="copyTicket()">
+      📋 Copy Order to Clipboard
+    </button>
+  </div>
+</div>
+
+<!-- 3. DIAGNOSTICS MODAL -->
 <div class="modal-overlay" id="diagModal" onclick="closeModalOnBg(event, 'diagModal')">
   <div class="modal-card">
     <div class="modal-title">
       <span>📡 Bloomberg Data Feed Diagnostics</span>
       <button class="close-btn" onclick="closeDiagModal()">&times;</button>
     </div>
-    <p style="font-size: 13px; color: var(--text-muted);">
-      Detailed breakdown of your data connection, protocol, and exact synchronization time:
-    </p>
-    <table class="diag-table">
+    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
       <tr>
-        <td>Exact Last Sync Time</td>
-        <td style="color: var(--accent-cyan); font-weight: 700;">October 09, 2026 at 03:11 PM</td>
+        <td style="padding: 8px; border-bottom: 1px solid #1a263e; color: var(--text-muted);">Exact Last Sync</td>
+        <td style="padding: 8px; border-bottom: 1px solid #1a263e; color: var(--accent-cyan); font-family: 'JetBrains Mono', monospace; font-weight: 700;">October 09, 2026 at 03:43 PM</td>
       </tr>
       <tr>
-        <td>Data Freshness Age</td>
-        <td id="diagDataAge">5 mins ago</td>
+        <td style="padding: 8px; border-bottom: 1px solid #1a263e; color: var(--text-muted);">Data Freshness</td>
+        <td style="padding: 8px; border-bottom: 1px solid #1a263e; font-family: 'JetBrains Mono', monospace;" id="diagDataAge">Just now</td>
       </tr>
       <tr>
-        <td>Connection Type</td>
-        <td id="diagConnType">Bloomberg Desktop API (BLPAPI / bbcomm.exe)</td>
+        <td style="padding: 8px; border-bottom: 1px solid #1a263e; color: var(--text-muted);">BLPAPI Daemon Port</td>
+        <td style="padding: 8px; border-bottom: 1px solid #1a263e; font-family: 'JetBrains Mono', monospace;">127.0.0.1:8194</td>
       </tr>
       <tr>
-        <td>Local Daemon Port</td>
-        <td>127.0.0.1:8194 (TCP Loopback)</td>
-      </tr>
-      <tr>
-        <td>Terminal Active Now?</td>
-        <td id="diagPortStatus">Checking...</td>
-      </tr>
-      <tr>
-        <td>File Source</td>
-        <td>bloomberg_live_remote_screener.csv</td>
+        <td style="padding: 8px; color: var(--text-muted);">Holdings Mode</td>
+        <td style="padding: 8px; font-family: 'JetBrains Mono', monospace; color: var(--accent-green);">Read-Only (Terminal Sync)</td>
       </tr>
     </table>
-    <div style="background: rgba(30, 41, 59, 0.5); padding: 12px; border-radius: 8px; font-size: 12px; color: var(--text-muted);">
-      <b>How to sync newer quotes from the terminal:</b><br>
-      1. Open the Bloomberg terminal in the Dallas College lab.<br>
-      2. Double-click <b>Sync & Share with Friend</b> on your Desktop.<br>
-      3. Fresh market quotes will immediately sync locally and push to GitHub.
-    </div>
   </div>
 </div>
 
-<!-- Trade Ticket Modal -->
-<div class="modal-overlay" id="tradeModal" onclick="closeModalOnBg(event, 'tradeModal')">
-  <div class="modal-card">
-    <div class="modal-title">
-      <span id="modalTickerTitle">Trade Order Ticket</span>
-      <button class="close-btn" onclick="closeModal()">&times;</button>
-    </div>
-    <p style="font-size: 13px; color: var(--text-muted);">
-      Pre-sized strictly within Dallas College 20% rules. Punch these exact parameters into the competition simulator:
-    </p>
-    <div class="ticket-box" id="ticketBox"></div>
-    <button class="copy-btn" id="copyBtn" onclick="copyTicket()">📋 Copy Order to Clipboard</button>
-  </div>
-</div>
+<div class="toast-notify" id="toastNotify"></div>
 
 <script>
-const stocksData = [{"symbol": "AVGO", "ticker": "AVGO US Equity", "name": "BROADCOM INC", "sector": "Information Technology", "price": 362.57, "chg_1d": 0.6747376, "chg_5d": 2.092133, "target": 529.7, "upside_pct": 46.1, "stop_loss": 337.19, "rr_ratio": 6.6, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 58, "hold_rec": 4, "sell_rec": 0, "buy_pct": 93.5, "roe": 44.2, "pe": 43.5, "market_cap": 1730774980153.05, "volume": 12447287.0, "earnings_date": "2026-12-11"}, {"symbol": "NVDA", "ticker": "NVDA US Equity", "name": "NVIDIA CORP", "sector": "Information Technology", "price": 229.785, "chg_1d": -0.3015446, "chg_5d": -1.780295, "target": 324.64, "upside_pct": 41.28, "stop_loss": 213.7, "rr_ratio": 5.9, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 79, "hold_rec": 2, "sell_rec": 1, "buy_pct": 96.3, "roe": 117.2, "pe": 33.0, "market_cap": 5537818500000.0, "volume": 64209802.0, "earnings_date": "2026-11-19"}, {"symbol": "GE", "ticker": "GE US Equity", "name": "GENERAL ELECTRIC", "sector": "Industrials", "price": 307.865, "chg_1d": 0.7345723, "chg_5d": -0.5475514, "target": 393.0, "upside_pct": 27.65, "stop_loss": 286.31, "rr_ratio": 3.9, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 21, "hold_rec": 3, "sell_rec": 2, "buy_pct": 80.8, "roe": 48.8, "pe": 42.6, "market_cap": 319429183064.745, "volume": 1844198.0, "earnings_date": "2026-10-20"}, {"symbol": "AMZN", "ticker": "AMZN US Equity", "name": "AMAZON.COM INC", "sector": "Consumer Discretionary", "price": 261.78, "chg_1d": 3.038652, "chg_5d": 4.079198, "target": 332.64, "upside_pct": 27.07, "stop_loss": 243.46, "rr_ratio": 3.9, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 77, "hold_rec": 4, "sell_rec": 0, "buy_pct": 95.1, "roe": 30.6, "pe": 36.4, "market_cap": 2823641166878.16, "volume": 24552192.0, "earnings_date": "2026-10-30"}, {"symbol": "UNH", "ticker": "UNH US Equity", "name": "UNITEDHEALTH GROUP INC", "sector": "Health Care", "price": 381.71, "chg_1d": 2.90066, "chg_5d": 2.637806, "target": 480.07, "upside_pct": 25.77, "stop_loss": 354.99, "rr_ratio": 3.7, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 25, "hold_rec": 5, "sell_rec": 0, "buy_pct": 83.3, "roe": 14.6, "pe": 21.4, "market_cap": 342620929048.37, "volume": 5250799.0, "earnings_date": "2026-10-13"}, {"symbol": "CAT", "ticker": "CAT US Equity", "name": "CATERPILLAR INC", "sector": "Industrials", "price": 802.34, "chg_1d": 0.7736944, "chg_5d": -5.095692, "target": 1007.16, "upside_pct": 25.53, "stop_loss": 746.18, "rr_ratio": 3.6, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 17, "hold_rec": 11, "sell_rec": 0, "buy_pct": 60.7, "roe": 57.0, "pe": 34.1, "market_cap": 368815550440.26, "volume": 1027301.0, "earnings_date": "2026-10-29"}, {"symbol": "LMT", "ticker": "LMT US Equity", "name": "LOCKHEED MARTIN CORP", "sector": "Industrials", "price": 509.29, "chg_1d": 0.2756502, "chg_5d": 0.7676936, "target": 634.04, "upside_pct": 24.5, "stop_loss": 473.64, "rr_ratio": 3.5, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 13, "hold_rec": 14, "sell_rec": 1, "buy_pct": 46.4, "roe": 89.2, "pe": 23.5, "market_cap": 117539422595.37, "volume": 519730.0, "earnings_date": "2026-10-22"}, {"symbol": "GS", "ticker": "GS US Equity", "name": "GOLDMAN SACHS GROUP INC", "sector": "Financials", "price": 897.14, "chg_1d": 1.648557, "chg_5d": -0.6005141, "target": 1116.0, "upside_pct": 24.4, "stop_loss": 834.34, "rr_ratio": 3.5, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 12, "hold_rec": 16, "sell_rec": 1, "buy_pct": 41.4, "roe": 18.3, "pe": 13.7, "market_cap": 271585203790.5, "volume": 1280873.0, "earnings_date": "2026-10-13"}, {"symbol": "RTX", "ticker": "RTX US Equity", "name": "RTX CORP", "sector": "Industrials", "price": 185.75, "chg_1d": 0.7758247, "chg_5d": 0.5793806, "target": 229.62, "upside_pct": 23.62, "stop_loss": 172.75, "rr_ratio": 3.4, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 20, "hold_rec": 7, "sell_rec": 1, "buy_pct": 71.4, "roe": 12.0, "pe": 26.8, "market_cap": 250346075248.0, "volume": 2282384.0, "earnings_date": "2026-10-20"}, {"symbol": "GOOGL", "ticker": "GOOGL US Equity", "name": "ALPHABET INC-CL A", "sector": "Communication Services", "price": 351.23, "chg_1d": 0.8441241, "chg_5d": 2.250364, "target": 429.25, "upside_pct": 22.21, "stop_loss": 326.64, "rr_ratio": 3.2, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 64, "hold_rec": 7, "sell_rec": 0, "buy_pct": 90.1, "roe": 49.5, "pe": 34.0, "market_cap": 4274231867500.0, "volume": 11846311.0, "earnings_date": "2026-10-28"}, {"symbol": "WMT", "ticker": "WMT US Equity", "name": "WALMART INC", "sector": "Consumer Staples", "price": 111.145, "chg_1d": 0.5291245, "chg_5d": 6.603683, "target": 128.84, "upside_pct": 15.92, "stop_loss": 103.36, "rr_ratio": 2.3, "signal": "QUALIFIED BUY", "badge_color": "primary", "buy_rec": 46, "hold_rec": 5, "sell_rec": 1, "buy_pct": 88.5, "roe": 23.4, "pe": 39.3, "market_cap": 881796225955.945, "volume": 7916610.0, "earnings_date": "2026-11-19"}, {"symbol": "LLY", "ticker": "LLY US Equity", "name": "ELI LILLY & CO", "sector": "Health Care", "price": 1175.95, "chg_1d": 0.5429207, "chg_5d": 2.896268, "target": 1347.22, "upside_pct": 14.56, "stop_loss": 1093.63, "rr_ratio": 2.1, "signal": "QUALIFIED BUY", "badge_color": "primary", "buy_rec": 30, "hold_rec": 4, "sell_rec": 1, "buy_pct": 85.7, "roe": 102.4, "pe": 33.0, "market_cap": 1106988840586.75, "volume": 924530.0, "earnings_date": "2026-10-29"}, {"symbol": "MA", "ticker": "MA US Equity", "name": "MASTERCARD INC - A", "sector": "Financials", "price": 588.925, "chg_1d": 2.61984, "chg_5d": 6.639083, "target": 670.67, "upside_pct": 13.88, "stop_loss": 547.7, "rr_ratio": 2.0, "signal": "QUALIFIED BUY", "badge_color": "primary", "buy_rec": 46, "hold_rec": 3, "sell_rec": 0, "buy_pct": 93.9, "roe": 241.5, "pe": 31.1, "market_cap": 516017133286.5, "volume": 1543688.0, "earnings_date": "2026-10-29"}, {"symbol": "COST", "ticker": "COST US Equity", "name": "COSTCO WHOLESALE CORP", "sector": "Consumer Staples", "price": 946.9, "chg_1d": -0.107604, "chg_5d": 2.851246, "target": 1077.09, "upside_pct": 13.75, "stop_loss": 880.62, "rr_ratio": 2.0, "signal": "QUALIFIED BUY", "badge_color": "primary", "buy_rec": 30, "hold_rec": 13, "sell_rec": 2, "buy_pct": 66.7, "roe": 28.4, "pe": 45.6, "market_cap": 419599180568.1, "volume": 924736.0, "earnings_date": "2026-12-11"}, {"symbol": "JPM", "ticker": "JPM US Equity", "name": "JPMORGAN CHASE & CO", "sector": "Financials", "price": 333.34, "chg_1d": 0.5793253, "chg_5d": 0.288826, "target": 371.4, "upside_pct": 11.42, "stop_loss": 310.01, "rr_ratio": 1.6, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 17, "hold_rec": 16, "sell_rec": 1, "buy_pct": 50.0, "roe": 18.4, "pe": 14.2, "market_cap": 886079786241.2998, "volume": 3168300.0, "earnings_date": "2026-10-13"}, {"symbol": "META", "ticker": "META US Equity", "name": "META PLATFORMS INC-CLASS A", "sector": "Communication Services", "price": 719.36, "chg_1d": -0.2122377, "chg_5d": -1.197671, "target": 795.28, "upside_pct": 10.55, "stop_loss": 669.0, "rr_ratio": 1.5, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 72, "hold_rec": 6, "sell_rec": 1, "buy_pct": 91.1, "roe": 29.8, "pe": 21.3, "market_cap": 1832574078016.0, "volume": 9992704.0, "earnings_date": "2026-10-29"}, {"symbol": "V", "ticker": "V US Equity", "name": "VISA INC-CLASS A SHARES", "sector": "Financials", "price": 385.245, "chg_1d": 2.704612, "chg_5d": 6.816669, "target": 424.29, "upside_pct": 10.13, "stop_loss": 358.28, "rr_ratio": 1.4, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 45, "hold_rec": 3, "sell_rec": 0, "buy_pct": 93.8, "roe": 62.4, "pe": 32.4, "market_cap": 719295890683.2638, "volume": 3837920.0, "earnings_date": "2026-10-27"}, {"symbol": "JNJ", "ticker": "JNJ US Equity", "name": "JOHNSON & JOHNSON", "sector": "Health Care", "price": 260.28, "chg_1d": 1.481597, "chg_5d": 1.659962, "target": 284.2, "upside_pct": 9.19, "stop_loss": 242.06, "rr_ratio": 1.3, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 20, "hold_rec": 7, "sell_rec": 0, "buy_pct": 74.1, "roe": 25.7, "pe": 28.1, "market_cap": 627248406827.1599, "volume": 3305448.0, "earnings_date": "2026-10-13"}, {"symbol": "MSFT", "ticker": "MSFT US Equity", "name": "MICROSOFT CORP", "sector": "Information Technology", "price": 535.411, "chg_1d": 2.449436, "chg_5d": 3.455065, "target": 582.31, "upside_pct": 8.76, "stop_loss": 497.93, "rr_ratio": 1.3, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 70, "hold_rec": 2, "sell_rec": 0, "buy_pct": 97.2, "roe": 34.0, "pe": 32.3, "market_cap": 3975718736881.8, "volume": 12457020.0, "earnings_date": "2026-10-28"}, {"symbol": "AMD", "ticker": "AMD US Equity", "name": "ADVANCED MICRO DEVICES", "sector": "Information Technology", "price": 609.7431, "chg_1d": -1.762084, "chg_5d": -3.812355, "target": 648.97, "upside_pct": 6.43, "stop_loss": 567.06, "rr_ratio": 0.9, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 56, "hold_rec": 12, "sell_rec": 0, "buy_pct": 82.4, "roe": 10.1, "pe": 169.3, "market_cap": 995390392781.7102, "volume": 10939958.0, "earnings_date": "2026-11-03"}, {"symbol": "CVX", "ticker": "CVX US Equity", "name": "CHEVRON CORP", "sector": "Energy", "price": 211.69, "chg_1d": 0.06617821, "chg_5d": 2.419082, "target": 225.21, "upside_pct": 6.39, "stop_loss": 196.87, "rr_ratio": 0.9, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 25, "hold_rec": 5, "sell_rec": 1, "buy_pct": 80.6, "roe": 12.2, "pe": 20.7, "market_cap": 418251020993.06, "volume": 3943646.0, "earnings_date": "2026-10-30"}, {"symbol": "TSLA", "ticker": "TSLA US Equity", "name": "TESLA INC", "sector": "Consumer Discretionary", "price": 383.97, "chg_1d": 2.392, "chg_5d": 3.610459, "target": 397.17, "upside_pct": 3.44, "stop_loss": 357.09, "rr_ratio": 0.5, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 29, "hold_rec": 24, "sell_rec": 8, "buy_pct": 47.5, "roe": 4.6, "pe": 384.1, "market_cap": 1516507712874.18, "volume": 33777365.0, "earnings_date": "2026-10-21"}, {"symbol": "ABBV", "ticker": "ABBV US Equity", "name": "ABBVIE INC", "sector": "Health Care", "price": 276.12, "chg_1d": 1.358197, "chg_5d": 5.060498, "target": 283.17, "upside_pct": 2.55, "stop_loss": 256.79, "rr_ratio": 0.4, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 27, "hold_rec": 6, "sell_rec": 0, "buy_pct": 81.8, "roe": 0.0, "pe": 27.2, "market_cap": 487936424734.2, "volume": 2057977.0, "earnings_date": "2026-10-30"}, {"symbol": "XOM", "ticker": "XOM US Equity", "name": "EXXONMOBIL HOLDINGS CORP", "sector": "Energy", "price": 168.77, "chg_1d": 0.1602374, "chg_5d": 2.902262, "target": 172.64, "upside_pct": 2.29, "stop_loss": 156.96, "rr_ratio": 0.3, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 12, "hold_rec": 19, "sell_rec": 0, "buy_pct": 38.7, "roe": 12.6, "pe": 20.4, "market_cap": 699459764861.2001, "volume": 5493118.0, "earnings_date": "2026-11-27"}, {"symbol": "AAPL", "ticker": "AAPL US Equity", "name": "APPLE INC", "sector": "Information Technology", "price": 337.0814, "chg_1d": -0.9807297, "chg_5d": 1.016333, "target": 333.61, "upside_pct": -1.03, "stop_loss": 313.49, "rr_ratio": -0.1, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 33, "hold_rec": 17, "sell_rec": 6, "buy_pct": 58.9, "roe": 148.8, "pe": 38.7, "market_cap": 4919426626251.999, "volume": 29097798.0, "earnings_date": "2026-11-02"}];
-const statusMeta = {"is_live": true, "is_port_open": false, "csv_timestamp": "October 09, 2026 at 03:11 PM", "csv_mtime_epoch": 1791576719, "age_label": "5 mins ago", "connection_protocol": "Bloomberg Desktop API (BLPAPI / bbcomm.exe on 127.0.0.1:8194)", "feed_mode": "LIVE_API"};
-let isSimulatedLive = false;
-let currentFilter = 'ALL';
-let currentSearch = '';
+// --- INITIAL DATA ---
+const marketDb = {"AAPL": {"symbol": "AAPL", "ticker": "AAPL US Equity", "name": "APPLE INC", "sector": "Information Technology", "price": 336.64, "chg_1d": -1.110393, "chg_5d": 0.8840541, "target": 333.61, "upside_pct": -0.9, "stop_loss": 313.08, "rr_ratio": -0.1, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 33, "hold_rec": 17, "sell_rec": 6, "buy_pct": 58.9, "roe": 148.8, "pe": 38.6, "market_cap": 4912984755200.0, "volume": 37765791.0, "earnings_date": "2026-11-02"}, "ABBV": {"symbol": "ABBV", "ticker": "ABBV US Equity", "name": "ABBVIE INC", "sector": "Health Care", "price": 276.47, "chg_1d": 1.486675, "chg_5d": 5.193669, "target": 283.17, "upside_pct": 2.42, "stop_loss": 257.12, "rr_ratio": 0.3, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 27, "hold_rec": 6, "sell_rec": 0, "buy_pct": 81.8, "roe": 0.0, "pe": 27.2, "market_cap": 488554915783.95, "volume": 4262958.0, "earnings_date": "2026-10-30"}, "AMD": {"symbol": "AMD", "ticker": "AMD US Equity", "name": "ADVANCED MICRO DEVICES", "sector": "Information Technology", "price": 608.1, "chg_1d": -2.026809, "chg_5d": -4.071556, "target": 648.97, "upside_pct": 6.72, "stop_loss": 565.53, "rr_ratio": 1.0, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 56, "hold_rec": 12, "sell_rec": 0, "buy_pct": 82.4, "roe": 10.1, "pe": 168.8, "market_cap": 992708073040.2, "volume": 13623783.0, "earnings_date": "2026-11-03"}, "AMZN": {"symbol": "AMZN", "ticker": "AMZN US Equity", "name": "AMAZON.COM INC", "sector": "Consumer Discretionary", "price": 262.43, "chg_1d": 3.294497, "chg_5d": 4.337627, "target": 332.64, "upside_pct": 26.75, "stop_loss": 244.06, "rr_ratio": 3.8, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 77, "hold_rec": 4, "sell_rec": 0, "buy_pct": 95.1, "roe": 30.6, "pe": 36.5, "market_cap": 2830652270699.9595, "volume": 33436615.0, "earnings_date": "2026-10-30"}, "AVGO": {"symbol": "AVGO", "ticker": "AVGO US Equity", "name": "BROADCOM INC", "sector": "Information Technology", "price": 361.54, "chg_1d": 0.3887377, "chg_5d": 1.802106, "target": 529.7, "upside_pct": 46.51, "stop_loss": 336.23, "rr_ratio": 6.6, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 58, "hold_rec": 4, "sell_rec": 0, "buy_pct": 93.5, "roe": 44.2, "pe": 43.4, "market_cap": 1725858141392.1, "volume": 16423255.0, "earnings_date": "2026-12-11"}, "CAT": {"symbol": "CAT", "ticker": "CAT US Equity", "name": "CATERPILLAR INC", "sector": "Industrials", "price": 800.47, "chg_1d": 0.5388229, "chg_5d": -5.316884, "target": 1007.16, "upside_pct": 25.82, "stop_loss": 744.44, "rr_ratio": 3.7, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 17, "hold_rec": 11, "sell_rec": 0, "buy_pct": 60.7, "roe": 57.0, "pe": 34.0, "market_cap": 367955958397.83, "volume": 1526727.0, "earnings_date": "2026-10-29"}, "COST": {"symbol": "COST", "ticker": "COST US Equity", "name": "COSTCO WHOLESALE CORP", "sector": "Consumer Staples", "price": 946.92, "chg_1d": -0.1054941, "chg_5d": 2.853419, "target": 1077.09, "upside_pct": 13.75, "stop_loss": 880.64, "rr_ratio": 2.0, "signal": "QUALIFIED BUY", "badge_color": "primary", "buy_rec": 30, "hold_rec": 13, "sell_rec": 2, "buy_pct": 66.7, "roe": 28.4, "pe": 45.6, "market_cap": 419608043155.08, "volume": 1485525.0, "earnings_date": "2026-12-11"}, "CVX": {"symbol": "CVX", "ticker": "CVX US Equity", "name": "CHEVRON CORP", "sector": "Energy", "price": 211.98, "chg_1d": 0.2032616, "chg_5d": 2.559388, "target": 225.21, "upside_pct": 6.24, "stop_loss": 197.14, "rr_ratio": 0.9, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 25, "hold_rec": 5, "sell_rec": 1, "buy_pct": 80.6, "roe": 12.2, "pe": 20.7, "market_cap": 418823994662.52, "volume": 6020412.0, "earnings_date": "2026-10-30"}, "GE": {"symbol": "GE", "ticker": "GE US Equity", "name": "GENERAL ELECTRIC", "sector": "Industrials", "price": 308.2, "chg_1d": 0.8441856, "chg_5d": -0.4393332, "target": 393.0, "upside_pct": 27.51, "stop_loss": 286.63, "rr_ratio": 3.9, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 21, "hold_rec": 3, "sell_rec": 2, "buy_pct": 80.8, "roe": 48.8, "pe": 42.7, "market_cap": 319776766506.6, "volume": 2946918.0, "earnings_date": "2026-10-20"}, "GOOGL": {"symbol": "GOOGL", "ticker": "GOOGL US Equity", "name": "ALPHABET INC-CL A", "sector": "Communication Services", "price": 351.66, "chg_1d": 0.9675845, "chg_5d": 2.375546, "target": 429.25, "upside_pct": 22.06, "stop_loss": 327.04, "rr_ratio": 3.2, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 64, "hold_rec": 7, "sell_rec": 0, "buy_pct": 90.1, "roe": 49.5, "pe": 34.0, "market_cap": 4278212700000.0, "volume": 17201442.0, "earnings_date": "2026-10-28"}, "GS": {"symbol": "GS", "ticker": "GS US Equity", "name": "GOLDMAN SACHS GROUP INC", "sector": "Financials", "price": 895.32, "chg_1d": 1.442346, "chg_5d": -0.8021627, "target": 1116.0, "upside_pct": 24.65, "stop_loss": 832.65, "rr_ratio": 3.5, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 12, "hold_rec": 16, "sell_rec": 1, "buy_pct": 41.4, "roe": 18.3, "pe": 13.7, "market_cap": 271034247339.0, "volume": 1856475.0, "earnings_date": "2026-10-13"}, "JNJ": {"symbol": "JNJ", "ticker": "JNJ US Equity", "name": "JOHNSON & JOHNSON", "sector": "Health Care", "price": 261.44, "chg_1d": 1.933874, "chg_5d": 2.113034, "target": 284.2, "upside_pct": 8.71, "stop_loss": 243.14, "rr_ratio": 1.2, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 20, "hold_rec": 7, "sell_rec": 0, "buy_pct": 74.1, "roe": 25.7, "pe": 28.2, "market_cap": 630043889199.6799, "volume": 5459240.0, "earnings_date": "2026-10-13"}, "JPM": {"symbol": "JPM", "ticker": "JPM US Equity", "name": "JPMORGAN CHASE & CO", "sector": "Financials", "price": 332.99, "chg_1d": 0.4737191, "chg_5d": 0.1835249, "target": 371.4, "upside_pct": 11.53, "stop_loss": 309.68, "rr_ratio": 1.6, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 17, "hold_rec": 16, "sell_rec": 1, "buy_pct": 50.0, "roe": 18.4, "pe": 14.2, "market_cap": 885149421073.05, "volume": 4917943.0, "earnings_date": "2026-10-13"}, "LLY": {"symbol": "LLY", "ticker": "LLY US Equity", "name": "ELI LILLY & CO", "sector": "Health Care", "price": 1179.27, "chg_1d": 0.8267784, "chg_5d": 3.18677, "target": 1347.22, "upside_pct": 14.24, "stop_loss": 1096.72, "rr_ratio": 2.0, "signal": "QUALIFIED BUY", "badge_color": "primary", "buy_rec": 30, "hold_rec": 4, "sell_rec": 1, "buy_pct": 85.7, "roe": 102.4, "pe": 33.1, "market_cap": 1110114146042.55, "volume": 1383717.0, "earnings_date": "2026-10-29"}, "LMT": {"symbol": "LMT", "ticker": "LMT US Equity", "name": "LOCKHEED MARTIN CORP", "sector": "Industrials", "price": 509.59, "chg_1d": 0.3347181, "chg_5d": 0.8270513, "target": 634.04, "upside_pct": 24.42, "stop_loss": 473.92, "rr_ratio": 3.5, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 13, "hold_rec": 14, "sell_rec": 1, "buy_pct": 46.4, "roe": 89.2, "pe": 23.5, "market_cap": 117608659821.27, "volume": 801202.0, "earnings_date": "2026-10-22"}, "MA": {"symbol": "MA", "ticker": "MA US Equity", "name": "MASTERCARD INC - A", "sector": "Financials", "price": 589.14, "chg_1d": 2.657304, "chg_5d": 6.678014, "target": 670.67, "upside_pct": 13.84, "stop_loss": 547.9, "rr_ratio": 2.0, "signal": "QUALIFIED BUY", "badge_color": "primary", "buy_rec": 46, "hold_rec": 3, "sell_rec": 0, "buy_pct": 93.9, "roe": 241.5, "pe": 31.1, "market_cap": 516205516669.2, "volume": 2423215.0, "earnings_date": "2026-10-29"}, "META": {"symbol": "META", "ticker": "META US Equity", "name": "META PLATFORMS INC-CLASS A", "sector": "Communication Services", "price": 718.67, "chg_1d": -0.3079527, "chg_5d": -1.29244, "target": 795.28, "upside_pct": 10.66, "stop_loss": 668.36, "rr_ratio": 1.5, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 72, "hold_rec": 6, "sell_rec": 1, "buy_pct": 91.1, "roe": 29.8, "pe": 21.3, "market_cap": 1830816298720.75, "volume": 12554878.0, "earnings_date": "2026-10-29"}, "MSFT": {"symbol": "MSFT", "ticker": "MSFT US Equity", "name": "MICROSOFT CORP", "sector": "Information Technology", "price": 535.07, "chg_1d": 2.384187, "chg_5d": 3.389176, "target": 582.31, "upside_pct": 8.83, "stop_loss": 497.62, "rr_ratio": 1.3, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 70, "hold_rec": 2, "sell_rec": 0, "buy_pct": 97.2, "roe": 34.0, "pe": 32.2, "market_cap": 3973186625869.37, "volume": 17819581.0, "earnings_date": "2026-10-28"}, "NVDA": {"symbol": "NVDA", "ticker": "NVDA US Equity", "name": "NVIDIA CORP", "sector": "Information Technology", "price": 229.28, "chg_1d": -0.5206526, "chg_5d": -1.996153, "target": 324.64, "upside_pct": 41.59, "stop_loss": 213.23, "rr_ratio": 5.9, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 79, "hold_rec": 2, "sell_rec": 1, "buy_pct": 96.3, "roe": 117.2, "pe": 33.0, "market_cap": 5525648000000.0, "volume": 84205379.0, "earnings_date": "2026-11-19"}, "RTX": {"symbol": "RTX", "ticker": "RTX US Equity", "name": "RTX CORP", "sector": "Industrials", "price": 185.97, "chg_1d": 0.8951823, "chg_5d": 0.6985055, "target": 229.62, "upside_pct": 23.47, "stop_loss": 172.95, "rr_ratio": 3.4, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 20, "hold_rec": 7, "sell_rec": 1, "buy_pct": 71.4, "roe": 12.0, "pe": 26.9, "market_cap": 250642582039.68, "volume": 3344658.0, "earnings_date": "2026-10-20"}, "TSLA": {"symbol": "TSLA", "ticker": "TSLA US Equity", "name": "TESLA INC", "sector": "Consumer Discretionary", "price": 382.7, "chg_1d": 2.053333, "chg_5d": 3.267762, "target": 397.17, "upside_pct": 3.78, "stop_loss": 355.91, "rr_ratio": 0.5, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 29, "hold_rec": 24, "sell_rec": 8, "buy_pct": 47.5, "roe": 4.6, "pe": 382.8, "market_cap": 1511491787683.7998, "volume": 38782597.0, "earnings_date": "2026-10-21"}, "UNH": {"symbol": "UNH", "ticker": "UNH US Equity", "name": "UNITEDHEALTH GROUP INC", "sector": "Health Care", "price": 379.3, "chg_1d": 2.250977, "chg_5d": 1.989782, "target": 480.07, "upside_pct": 26.57, "stop_loss": 352.75, "rr_ratio": 3.8, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 25, "hold_rec": 5, "sell_rec": 0, "buy_pct": 83.3, "roe": 14.6, "pe": 21.3, "market_cap": 340457725467.1, "volume": 7439236.0, "earnings_date": "2026-10-13"}, "V": {"symbol": "V", "ticker": "V US Equity", "name": "VISA INC-CLASS A SHARES", "sector": "Financials", "price": 385.45, "chg_1d": 2.759264, "chg_5d": 6.87351, "target": 424.29, "upside_pct": 10.08, "stop_loss": 358.47, "rr_ratio": 1.4, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 45, "hold_rec": 3, "sell_rec": 0, "buy_pct": 93.8, "roe": 62.4, "pe": 32.4, "market_cap": 719678648817.9313, "volume": 5815546.0, "earnings_date": "2026-10-27"}, "WMT": {"symbol": "WMT", "ticker": "WMT US Equity", "name": "WALMART INC", "sector": "Consumer Staples", "price": 111.35, "chg_1d": 0.7145441, "chg_5d": 6.800307, "target": 128.84, "upside_pct": 15.71, "stop_loss": 103.56, "rr_ratio": 2.2, "signal": "QUALIFIED BUY", "badge_color": "primary", "buy_rec": 46, "hold_rec": 5, "sell_rec": 1, "buy_pct": 88.5, "roe": 23.4, "pe": 39.4, "market_cap": 883422643935.3499, "volume": 11817135.0, "earnings_date": "2026-11-19"}, "XOM": {"symbol": "XOM", "ticker": "XOM US Equity", "name": "EXXONMOBIL HOLDINGS CORP", "sector": "Energy", "price": 168.94, "chg_1d": 0.2611276, "chg_5d": 3.005914, "target": 172.64, "upside_pct": 2.19, "stop_loss": 157.11, "rr_ratio": 0.3, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 12, "hold_rec": 19, "sell_rec": 0, "buy_pct": 38.7, "roe": 12.6, "pe": 20.4, "market_cap": 700164322306.4, "volume": 8078028.0, "earnings_date": "2026-11-27"}};
+const universeList = [{"symbol": "AVGO", "ticker": "AVGO US Equity", "name": "BROADCOM INC", "sector": "Information Technology", "price": 361.54, "chg_1d": 0.3887377, "chg_5d": 1.802106, "target": 529.7, "upside_pct": 46.51, "stop_loss": 336.23, "rr_ratio": 6.6, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 58, "hold_rec": 4, "sell_rec": 0, "buy_pct": 93.5, "roe": 44.2, "pe": 43.4, "market_cap": 1725858141392.1, "volume": 16423255.0, "earnings_date": "2026-12-11"}, {"symbol": "NVDA", "ticker": "NVDA US Equity", "name": "NVIDIA CORP", "sector": "Information Technology", "price": 229.28, "chg_1d": -0.5206526, "chg_5d": -1.996153, "target": 324.64, "upside_pct": 41.59, "stop_loss": 213.23, "rr_ratio": 5.9, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 79, "hold_rec": 2, "sell_rec": 1, "buy_pct": 96.3, "roe": 117.2, "pe": 33.0, "market_cap": 5525648000000.0, "volume": 84205379.0, "earnings_date": "2026-11-19"}, {"symbol": "GE", "ticker": "GE US Equity", "name": "GENERAL ELECTRIC", "sector": "Industrials", "price": 308.2, "chg_1d": 0.8441856, "chg_5d": -0.4393332, "target": 393.0, "upside_pct": 27.51, "stop_loss": 286.63, "rr_ratio": 3.9, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 21, "hold_rec": 3, "sell_rec": 2, "buy_pct": 80.8, "roe": 48.8, "pe": 42.7, "market_cap": 319776766506.6, "volume": 2946918.0, "earnings_date": "2026-10-20"}, {"symbol": "AMZN", "ticker": "AMZN US Equity", "name": "AMAZON.COM INC", "sector": "Consumer Discretionary", "price": 262.43, "chg_1d": 3.294497, "chg_5d": 4.337627, "target": 332.64, "upside_pct": 26.75, "stop_loss": 244.06, "rr_ratio": 3.8, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 77, "hold_rec": 4, "sell_rec": 0, "buy_pct": 95.1, "roe": 30.6, "pe": 36.5, "market_cap": 2830652270699.9595, "volume": 33436615.0, "earnings_date": "2026-10-30"}, {"symbol": "UNH", "ticker": "UNH US Equity", "name": "UNITEDHEALTH GROUP INC", "sector": "Health Care", "price": 379.3, "chg_1d": 2.250977, "chg_5d": 1.989782, "target": 480.07, "upside_pct": 26.57, "stop_loss": 352.75, "rr_ratio": 3.8, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 25, "hold_rec": 5, "sell_rec": 0, "buy_pct": 83.3, "roe": 14.6, "pe": 21.3, "market_cap": 340457725467.1, "volume": 7439236.0, "earnings_date": "2026-10-13"}, {"symbol": "CAT", "ticker": "CAT US Equity", "name": "CATERPILLAR INC", "sector": "Industrials", "price": 800.47, "chg_1d": 0.5388229, "chg_5d": -5.316884, "target": 1007.16, "upside_pct": 25.82, "stop_loss": 744.44, "rr_ratio": 3.7, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 17, "hold_rec": 11, "sell_rec": 0, "buy_pct": 60.7, "roe": 57.0, "pe": 34.0, "market_cap": 367955958397.83, "volume": 1526727.0, "earnings_date": "2026-10-29"}, {"symbol": "GS", "ticker": "GS US Equity", "name": "GOLDMAN SACHS GROUP INC", "sector": "Financials", "price": 895.32, "chg_1d": 1.442346, "chg_5d": -0.8021627, "target": 1116.0, "upside_pct": 24.65, "stop_loss": 832.65, "rr_ratio": 3.5, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 12, "hold_rec": 16, "sell_rec": 1, "buy_pct": 41.4, "roe": 18.3, "pe": 13.7, "market_cap": 271034247339.0, "volume": 1856475.0, "earnings_date": "2026-10-13"}, {"symbol": "LMT", "ticker": "LMT US Equity", "name": "LOCKHEED MARTIN CORP", "sector": "Industrials", "price": 509.59, "chg_1d": 0.3347181, "chg_5d": 0.8270513, "target": 634.04, "upside_pct": 24.42, "stop_loss": 473.92, "rr_ratio": 3.5, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 13, "hold_rec": 14, "sell_rec": 1, "buy_pct": 46.4, "roe": 89.2, "pe": 23.5, "market_cap": 117608659821.27, "volume": 801202.0, "earnings_date": "2026-10-22"}, {"symbol": "RTX", "ticker": "RTX US Equity", "name": "RTX CORP", "sector": "Industrials", "price": 185.97, "chg_1d": 0.8951823, "chg_5d": 0.6985055, "target": 229.62, "upside_pct": 23.47, "stop_loss": 172.95, "rr_ratio": 3.4, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 20, "hold_rec": 7, "sell_rec": 1, "buy_pct": 71.4, "roe": 12.0, "pe": 26.9, "market_cap": 250642582039.68, "volume": 3344658.0, "earnings_date": "2026-10-20"}, {"symbol": "GOOGL", "ticker": "GOOGL US Equity", "name": "ALPHABET INC-CL A", "sector": "Communication Services", "price": 351.66, "chg_1d": 0.9675845, "chg_5d": 2.375546, "target": 429.25, "upside_pct": 22.06, "stop_loss": 327.04, "rr_ratio": 3.2, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 64, "hold_rec": 7, "sell_rec": 0, "buy_pct": 90.1, "roe": 49.5, "pe": 34.0, "market_cap": 4278212700000.0, "volume": 17201442.0, "earnings_date": "2026-10-28"}, {"symbol": "WMT", "ticker": "WMT US Equity", "name": "WALMART INC", "sector": "Consumer Staples", "price": 111.35, "chg_1d": 0.7145441, "chg_5d": 6.800307, "target": 128.84, "upside_pct": 15.71, "stop_loss": 103.56, "rr_ratio": 2.2, "signal": "QUALIFIED BUY", "badge_color": "primary", "buy_rec": 46, "hold_rec": 5, "sell_rec": 1, "buy_pct": 88.5, "roe": 23.4, "pe": 39.4, "market_cap": 883422643935.3499, "volume": 11817135.0, "earnings_date": "2026-11-19"}, {"symbol": "LLY", "ticker": "LLY US Equity", "name": "ELI LILLY & CO", "sector": "Health Care", "price": 1179.27, "chg_1d": 0.8267784, "chg_5d": 3.18677, "target": 1347.22, "upside_pct": 14.24, "stop_loss": 1096.72, "rr_ratio": 2.0, "signal": "QUALIFIED BUY", "badge_color": "primary", "buy_rec": 30, "hold_rec": 4, "sell_rec": 1, "buy_pct": 85.7, "roe": 102.4, "pe": 33.1, "market_cap": 1110114146042.55, "volume": 1383717.0, "earnings_date": "2026-10-29"}, {"symbol": "MA", "ticker": "MA US Equity", "name": "MASTERCARD INC - A", "sector": "Financials", "price": 589.14, "chg_1d": 2.657304, "chg_5d": 6.678014, "target": 670.67, "upside_pct": 13.84, "stop_loss": 547.9, "rr_ratio": 2.0, "signal": "QUALIFIED BUY", "badge_color": "primary", "buy_rec": 46, "hold_rec": 3, "sell_rec": 0, "buy_pct": 93.9, "roe": 241.5, "pe": 31.1, "market_cap": 516205516669.2, "volume": 2423215.0, "earnings_date": "2026-10-29"}, {"symbol": "COST", "ticker": "COST US Equity", "name": "COSTCO WHOLESALE CORP", "sector": "Consumer Staples", "price": 946.92, "chg_1d": -0.1054941, "chg_5d": 2.853419, "target": 1077.09, "upside_pct": 13.75, "stop_loss": 880.64, "rr_ratio": 2.0, "signal": "QUALIFIED BUY", "badge_color": "primary", "buy_rec": 30, "hold_rec": 13, "sell_rec": 2, "buy_pct": 66.7, "roe": 28.4, "pe": 45.6, "market_cap": 419608043155.08, "volume": 1485525.0, "earnings_date": "2026-12-11"}, {"symbol": "JPM", "ticker": "JPM US Equity", "name": "JPMORGAN CHASE & CO", "sector": "Financials", "price": 332.99, "chg_1d": 0.4737191, "chg_5d": 0.1835249, "target": 371.4, "upside_pct": 11.53, "stop_loss": 309.68, "rr_ratio": 1.6, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 17, "hold_rec": 16, "sell_rec": 1, "buy_pct": 50.0, "roe": 18.4, "pe": 14.2, "market_cap": 885149421073.05, "volume": 4917943.0, "earnings_date": "2026-10-13"}, {"symbol": "META", "ticker": "META US Equity", "name": "META PLATFORMS INC-CLASS A", "sector": "Communication Services", "price": 718.67, "chg_1d": -0.3079527, "chg_5d": -1.29244, "target": 795.28, "upside_pct": 10.66, "stop_loss": 668.36, "rr_ratio": 1.5, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 72, "hold_rec": 6, "sell_rec": 1, "buy_pct": 91.1, "roe": 29.8, "pe": 21.3, "market_cap": 1830816298720.75, "volume": 12554878.0, "earnings_date": "2026-10-29"}, {"symbol": "V", "ticker": "V US Equity", "name": "VISA INC-CLASS A SHARES", "sector": "Financials", "price": 385.45, "chg_1d": 2.759264, "chg_5d": 6.87351, "target": 424.29, "upside_pct": 10.08, "stop_loss": 358.47, "rr_ratio": 1.4, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 45, "hold_rec": 3, "sell_rec": 0, "buy_pct": 93.8, "roe": 62.4, "pe": 32.4, "market_cap": 719678648817.9313, "volume": 5815546.0, "earnings_date": "2026-10-27"}, {"symbol": "MSFT", "ticker": "MSFT US Equity", "name": "MICROSOFT CORP", "sector": "Information Technology", "price": 535.07, "chg_1d": 2.384187, "chg_5d": 3.389176, "target": 582.31, "upside_pct": 8.83, "stop_loss": 497.62, "rr_ratio": 1.3, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 70, "hold_rec": 2, "sell_rec": 0, "buy_pct": 97.2, "roe": 34.0, "pe": 32.2, "market_cap": 3973186625869.37, "volume": 17819581.0, "earnings_date": "2026-10-28"}, {"symbol": "JNJ", "ticker": "JNJ US Equity", "name": "JOHNSON & JOHNSON", "sector": "Health Care", "price": 261.44, "chg_1d": 1.933874, "chg_5d": 2.113034, "target": 284.2, "upside_pct": 8.71, "stop_loss": 243.14, "rr_ratio": 1.2, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 20, "hold_rec": 7, "sell_rec": 0, "buy_pct": 74.1, "roe": 25.7, "pe": 28.2, "market_cap": 630043889199.6799, "volume": 5459240.0, "earnings_date": "2026-10-13"}, {"symbol": "AMD", "ticker": "AMD US Equity", "name": "ADVANCED MICRO DEVICES", "sector": "Information Technology", "price": 608.1, "chg_1d": -2.026809, "chg_5d": -4.071556, "target": 648.97, "upside_pct": 6.72, "stop_loss": 565.53, "rr_ratio": 1.0, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 56, "hold_rec": 12, "sell_rec": 0, "buy_pct": 82.4, "roe": 10.1, "pe": 168.8, "market_cap": 992708073040.2, "volume": 13623783.0, "earnings_date": "2026-11-03"}, {"symbol": "CVX", "ticker": "CVX US Equity", "name": "CHEVRON CORP", "sector": "Energy", "price": 211.98, "chg_1d": 0.2032616, "chg_5d": 2.559388, "target": 225.21, "upside_pct": 6.24, "stop_loss": 197.14, "rr_ratio": 0.9, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 25, "hold_rec": 5, "sell_rec": 1, "buy_pct": 80.6, "roe": 12.2, "pe": 20.7, "market_cap": 418823994662.52, "volume": 6020412.0, "earnings_date": "2026-10-30"}, {"symbol": "TSLA", "ticker": "TSLA US Equity", "name": "TESLA INC", "sector": "Consumer Discretionary", "price": 382.7, "chg_1d": 2.053333, "chg_5d": 3.267762, "target": 397.17, "upside_pct": 3.78, "stop_loss": 355.91, "rr_ratio": 0.5, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 29, "hold_rec": 24, "sell_rec": 8, "buy_pct": 47.5, "roe": 4.6, "pe": 382.8, "market_cap": 1511491787683.7998, "volume": 38782597.0, "earnings_date": "2026-10-21"}, {"symbol": "ABBV", "ticker": "ABBV US Equity", "name": "ABBVIE INC", "sector": "Health Care", "price": 276.47, "chg_1d": 1.486675, "chg_5d": 5.193669, "target": 283.17, "upside_pct": 2.42, "stop_loss": 257.12, "rr_ratio": 0.3, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 27, "hold_rec": 6, "sell_rec": 0, "buy_pct": 81.8, "roe": 0.0, "pe": 27.2, "market_cap": 488554915783.95, "volume": 4262958.0, "earnings_date": "2026-10-30"}, {"symbol": "XOM", "ticker": "XOM US Equity", "name": "EXXONMOBIL HOLDINGS CORP", "sector": "Energy", "price": 168.94, "chg_1d": 0.2611276, "chg_5d": 3.005914, "target": 172.64, "upside_pct": 2.19, "stop_loss": 157.11, "rr_ratio": 0.3, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 12, "hold_rec": 19, "sell_rec": 0, "buy_pct": 38.7, "roe": 12.6, "pe": 20.4, "market_cap": 700164322306.4, "volume": 8078028.0, "earnings_date": "2026-11-27"}, {"symbol": "AAPL", "ticker": "AAPL US Equity", "name": "APPLE INC", "sector": "Information Technology", "price": 336.64, "chg_1d": -1.110393, "chg_5d": 0.8840541, "target": 333.61, "upside_pct": -0.9, "stop_loss": 313.08, "rr_ratio": -0.1, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 33, "hold_rec": 17, "sell_rec": 6, "buy_pct": 58.9, "roe": 148.8, "pe": 38.6, "market_cap": 4912984755200.0, "volume": 37765791.0, "earnings_date": "2026-11-02"}];
+const actualHoldings = []; // Strictly read-only
+let wishlistItems = []; // Empty by default
+const statusMeta = {"is_live": true, "is_port_open": true, "csv_timestamp": "October 09, 2026 at 03:43 PM", "csv_mtime_epoch": 1791578638, "age_label": "Just now", "connection_protocol": "Bloomberg Desktop API (BLPAPI / bbcomm.exe on 127.0.0.1:8194)", "feed_mode": "LIVE_API"};
 
-// Live Dynamic Age Calculator (updates every minute)
-function updateDynamicAge() {
-  const epoch = statusMeta.csv_mtime_epoch;
-  if (!epoch) return;
-  const nowSec = Math.floor(Date.now() / 1000);
-  const diff = nowSec - epoch;
-  let label = "Just now";
-  if (diff >= 86400) {
-    const d = Math.floor(diff / 86400);
-    label = d + (d === 1 ? " day ago" : " days ago");
-  } else if (diff >= 3600) {
-    const h = Math.floor(diff / 3600);
-    label = h + (h === 1 ? " hr ago" : " hrs ago");
-  } else if (diff >= 60) {
-    const m = Math.floor(diff / 60);
-    label = m + (m === 1 ? " min ago" : " mins ago");
-  } else if (diff > 5) {
-    label = diff + " sec ago";
-  } else {
-    label = "Just now";
+let currentUniverseFilter = 'ALL';
+let currentUniverseSearch = '';
+let activePage = 'holdings';
+
+function switchPage(pageId) {
+  activePage = pageId;
+  const tabHoldings = document.getElementById('tabBtnHoldings');
+  const tabWishlist = document.getElementById('tabBtnWishlist');
+  const tabUniverse = document.getElementById('tabBtnUniverse');
+  const subHoldings = document.getElementById('subpageHoldings');
+  const subWishlist = document.getElementById('subpageWishlist');
+  const subUniverse = document.getElementById('subpageUniverse');
+
+  tabHoldings.classList.toggle('active', pageId === 'holdings');
+  tabWishlist.classList.toggle('active', pageId === 'wishlist');
+  tabUniverse.classList.toggle('active', pageId === 'universe');
+
+  subHoldings.classList.toggle('active', pageId === 'holdings');
+  subWishlist.classList.toggle('active', pageId === 'wishlist');
+  subUniverse.classList.toggle('active', pageId === 'universe');
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toastNotify');
+  t.innerHTML = msg;
+  t.style.display = 'flex';
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+async function triggerServerSync() {
+  const btn = document.getElementById('syncBtn');
+  btn.innerHTML = '🔄 Syncing...';
+  try {
+    const res = await fetch('/api/sync', { method: 'POST' });
+    if (res.ok) {
+      showToast('✅ Synced live with Bloomberg quotes!');
+      setTimeout(() => { window.location.reload(); }, 1000);
+      return;
+    }
+  } catch (e) {
+    window.location.reload();
   }
-  
-  const elBanner = document.getElementById('bannerAgeText');
-  if (elBanner) elBanner.innerText = label;
-  const elHeader = document.getElementById('headerSyncAge');
-  if (elHeader) elHeader.innerText = "(" + label + ")";
-  const elDiag = document.getElementById('diagDataAge');
-  if (elDiag) elDiag.innerText = label;
+  btn.innerHTML = '🔄 Sync Bloomberg';
 }
 
-// Initialize connection banner and sync info
-function applyModeUI() {
-  const isCurrentlyLive = isSimulatedLive || statusMeta.is_live;
-  const banner = document.getElementById('modeBanner');
-  const pill = document.getElementById('modePill');
-  const dot = document.getElementById('pulseDot');
-  const text = document.getElementById('modeText');
-  const summary = document.getElementById('bannerSummary');
-  const feedLabel = document.getElementById('feedStatusLabel');
-  const diagPort = document.getElementById('diagPortStatus');
+// =========================================================================
+// RECALCULATION & RENDERING
+// =========================================================================
 
-  if (isCurrentlyLive) {
-    banner.className = 'mode-banner live';
-    pill.className = 'mode-pill live';
-    dot.className = 'pulse-dot live';
-    text.innerText = 'LIVE API FEED';
-    summary.innerHTML = '<b>Last Synced:</b> ' + statusMeta.csv_timestamp + ' (<span id="bannerAgeText">' + statusMeta.age_label + '</span>) • Bloomberg API (127.0.0.1:8194): <b style="color: var(--accent-green);">Connected</b>';
-    feedLabel.innerHTML = 'Status: <b style="color: var(--accent-green);">● Live BLPAPI Feed</b>';
-    diagPort.innerHTML = '<span style="color: var(--accent-green);">🟢 Connected (Active Session)</span>';
-  } else {
-    banner.className = 'mode-banner offline';
-    pill.className = 'mode-pill offline';
-    dot.className = 'pulse-dot offline';
-    text.innerText = 'OFFLINE SNAPSHOT';
-    summary.innerHTML = '<b>Last Synced:</b> ' + statusMeta.csv_timestamp + ' (<span id="bannerAgeText">' + statusMeta.age_label + '</span>) • Bloomberg API (127.0.0.1:8194): <b>Offline</b>';
-    feedLabel.innerHTML = 'Status: <b style="color: var(--accent-amber);">Cached Snapshot</b>';
-    diagPort.innerHTML = '<span style="color: var(--accent-red);">🔴 Disconnected (bbcomm offline)</span>';
-  }
-  updateDynamicAge();
-  renderStocks();
-}
+function recalculateAll() {
+  const totalCashInput = parseFloat(document.getElementById('cashInput').value) || 1000000;
+  const maxClip = totalCashInput * 0.20;
+  document.getElementById('kpiMaxCap').innerText = '$' + maxClip.toLocaleString(undefined, {maximumFractionDigits: 0});
 
-function toggleSimulatedMode() {
-  isSimulatedLive = !isSimulatedLive;
-  applyModeUI();
-}
+  // 1. Current Holdings Calculation (Read-Only)
+  let totalInvestedCost = 0;
+  let totalCurrentMarketVal = 0;
+  const enrichedHoldings = actualHoldings.map(h => {
+    const stock = marketDb[h.symbol] || {
+      symbol: h.symbol, name: h.symbol, sector: 'Equities', price: h.entry_price || 0,
+      target: (h.entry_price || 0) * 1.15, earnings_date: 'TBD', chg_1d: 0
+    };
+    const curPrice = stock.price || h.entry_price;
+    const costBasis = h.shares * h.entry_price;
+    const marketVal = h.shares * curPrice;
+    const pnlDollar = marketVal - costBasis;
+    const pnlPct = costBasis > 0 ? (pnlDollar / costBasis) * 100 : 0;
+    const stopPrice = h.entry_price * 0.93;
 
-function openDiagModal() {
-  document.getElementById('diagModal').style.display = 'flex';
-}
+    totalInvestedCost += costBasis;
+    totalCurrentMarketVal += marketVal;
 
-function closeDiagModal() {
-  document.getElementById('diagModal').style.display = 'none';
-}
-
-function renderStocks() {
-  const grid = document.getElementById('stocksGrid');
-  grid.innerHTML = '';
-  const totalCash = parseFloat(document.getElementById('cashInput').value) || 1000000;
-  const maxClip = totalCash * 0.20;
-  const isCurrentlyLive = isSimulatedLive || statusMeta.is_live;
-
-  const filtered = stocksData.filter(s => {
-    const matchesSector = currentFilter === 'ALL' || s.sector.toLowerCase().includes(currentFilter.toLowerCase());
-    const matchesSearch = s.symbol.toLowerCase().includes(currentSearch.toLowerCase()) || 
-                          s.name.toLowerCase().includes(currentSearch.toLowerCase());
-    return matchesSector && matchesSearch;
+    return { ...h, stock, curPrice, costBasis, marketVal, pnlDollar, pnlPct, stopPrice };
   });
 
-  filtered.forEach(s => {
-    const sharesToBuy = s.price > 0 ? Math.floor(maxClip / s.price) : 0;
-    const badgeHtml = isCurrentlyLive
-      ? '<span class="state-badge live">● LIVE</span>'
-      : '<span class="state-badge offline">CACHED</span>';
+  const totalUnrealizedPnl = totalCurrentMarketVal - totalInvestedCost;
+  const availableCash = totalCashInput - totalInvestedCost;
+  const totalPortfolioEquity = availableCash + totalCurrentMarketVal;
 
+  document.getElementById('kpiTotalEquity').innerText = '$' + totalPortfolioEquity.toLocaleString(undefined, {maximumFractionDigits: 2});
+  document.getElementById('kpiCashAvailable').innerText = '$' + Math.max(0, availableCash).toLocaleString(undefined, {maximumFractionDigits: 2});
+  document.getElementById('kpiInvestedText').innerText = `Invested: $${totalInvestedCost.toLocaleString(undefined, {maximumFractionDigits: 0})} (0.0% deployed)`;
+
+  const slotsUsed = enrichedHoldings.length;
+  document.getElementById('kpiSlotsText').innerText = `${slotsUsed} / 5`;
+  document.getElementById('kpiSlotsDesc').innerText = `${5 - slotsUsed} clips open (${100 - (slotsUsed * 20)}% capacity)`;
+
+  // Update Badges
+  document.getElementById('badgeCountInvested').innerText = slotsUsed;
+  document.getElementById('badgeCountWishlist').innerText = wishlistItems.length;
+  document.getElementById('wishlistCountHeader').innerText = `${wishlistItems.length} Saved`;
+  document.getElementById('trackerAllocPercent').innerText = `${(slotsUsed * 20).toFixed(0)}% / 100% Max Clips Deployed`;
+
+  renderAllocationSlots(enrichedHoldings, maxClip);
+  renderHoldingsTable(enrichedHoldings, totalPortfolioEquity);
+  renderWishlistGrid(maxClip);
+  renderUniverseGrid(maxClip);
+}
+
+function renderAllocationSlots(holdings, maxClip) {
+  const grid = document.getElementById('slotsGrid');
+  grid.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const h = holdings[i];
+    const box = document.createElement('div');
+    if (h) {
+      box.className = 'slot-box occupied';
+      box.innerHTML = `
+        <div class="slot-num">Slot ${i + 1} (20% Clip)</div>
+        <div class="slot-ticker">${h.symbol}</div>
+        <div class="slot-meta">$${h.marketVal.toLocaleString(undefined, {maximumFractionDigits: 0})} • ${h.shares.toLocaleString()} sh</div>
+      `;
+    } else {
+      box.className = 'slot-box';
+      box.innerHTML = `
+        <div class="slot-num">Slot ${i + 1} (Open Clip)</div>
+        <div class="slot-ticker empty">Unallocated</div>
+        <div class="slot-meta" style="color: var(--text-dim);">$${maxClip.toLocaleString(undefined, {maximumFractionDigits: 0})} capacity</div>
+      `;
+    }
+    grid.appendChild(box);
+  }
+}
+
+function renderHoldingsTable(holdings, totalEquity) {
+  const emptyCard = document.getElementById('emptyHoldingsCard');
+  const tableWrap = document.getElementById('holdingsTableWrap');
+  const tbody = document.getElementById('holdingsTableBody');
+
+  if (holdings.length === 0) {
+    emptyCard.style.display = 'flex';
+    tableWrap.style.display = 'none';
+    tbody.innerHTML = '';
+    return;
+  }
+
+  emptyCard.style.display = 'none';
+  tableWrap.style.display = 'block';
+  tbody.innerHTML = '';
+
+  holdings.forEach(h => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div style="font-weight: 800; font-family: 'JetBrains Mono', monospace; font-size: 15px; color: #ffffff;">${h.symbol}</div>
+        <div style="font-size: 11px; color: var(--text-muted);">${h.stock.name} • <span class="sector-tag">${h.stock.sector}</span></div>
+      </td>
+      <td style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent-cyan);">${h.shares.toLocaleString()} sh</td>
+      <td style="font-family: 'JetBrains Mono', monospace;">$${h.entry_price.toFixed(2)}</td>
+      <td style="font-family: 'JetBrains Mono', monospace; font-weight: 700;">$${h.curPrice.toFixed(2)}</td>
+      <td style="font-family: 'JetBrains Mono', monospace; font-weight: 700;">$${h.marketVal.toLocaleString(undefined, {maximumFractionDigits: 2})}</td>
+      <td>
+        <span style="font-weight: 700; font-family: 'JetBrains Mono', monospace; color: ${h.pnlDollar >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'};">
+          ${h.pnlDollar >= 0 ? '+' : ''}$${h.pnlDollar.toFixed(2)} (${h.pnlPct.toFixed(2)}%)
+        </span>
+      </td>
+      <td style="font-family: 'JetBrains Mono', monospace;">${((h.marketVal / totalEquity) * 100).toFixed(1)}%</td>
+      <td style="font-family: 'JetBrains Mono', monospace; color: var(--accent-red);">$${h.stopPrice.toFixed(2)} (-7%)</td>
+      <td style="font-family: 'JetBrains Mono', monospace; color: var(--accent-gold);">${h.stock.earnings_date}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// =========================================================================
+// RENDER VIEW 2: TEAM WISHLIST (EMPTY BY DEFAULT, REMOVABLE)
+// =========================================================================
+
+function renderWishlistGrid(maxClip) {
+  const grid = document.getElementById('wishlistGrid');
+  const emptyCard = document.getElementById('emptyWishlistCard');
+
+  if (wishlistItems.length === 0) {
+    emptyCard.style.display = 'flex';
+    grid.innerHTML = '';
+    return;
+  }
+
+  emptyCard.style.display = 'none';
+  grid.innerHTML = '';
+
+  wishlistItems.forEach(item => {
+    const s = marketDb[item.symbol] || {
+      symbol: item.symbol, ticker: item.symbol + ' US Equity', name: item.symbol,
+      sector: 'Custom', price: 100.0, target: 130.0, upside_pct: 30.0,
+      stop_loss: 93.0, rr_ratio: 4.3, signal: 'WISHLIST TARGET', badge_color: 'primary',
+      chg_1d: 0, earnings_date: 'TBD'
+    };
+
+    const sharesToBuy = s.price > 0 ? Math.floor(maxClip / s.price) : 0;
     const card = document.createElement('div');
-    card.className = 'stock-card';
+    card.className = 'stock-card is-wishlist';
     card.innerHTML = `
-      <!-- Clean 2-Row Header (Zero Overflow) -->
       <div class="card-header">
         <div class="header-main-row">
           <div class="ticker-symbol">${s.symbol}</div>
@@ -942,18 +1369,17 @@ function renderStocks() {
         </div>
       </div>
 
-      <!-- Price Row -->
       <div class="price-row">
         <div class="current-price">$${s.price.toFixed(2)}</div>
         <div class="price-tag-group">
-          ${badgeHtml}
           <div class="change-pct ${s.chg_1d >= 0 ? 'pos' : 'neg'}">
             ${s.chg_1d >= 0 ? '+' : ''}${s.chg_1d.toFixed(2)}%
           </div>
         </div>
       </div>
 
-      <!-- Institutional Metrics Box -->
+      ${item.notes ? `<div class="wishlist-notes-box">💡 ${item.notes}</div>` : ''}
+
       <div class="metric-rows">
         <div class="metric-row">
           <span class="label">Wall St Target:</span>
@@ -964,7 +1390,7 @@ function renderStocks() {
           <span class="val val-stop">$${s.stop_loss.toFixed(2)} (-7.0%)</span>
         </div>
         <div class="metric-row">
-          <span class="label">Asymmetric Risk/Reward:</span>
+          <span class="label">Asymmetric R:R:</span>
           <span class="val" style="color: var(--accent-cyan);">${s.rr_ratio}:1 Ratio</span>
         </div>
         <div class="metric-row">
@@ -972,8 +1398,84 @@ function renderStocks() {
           <span class="val" style="color: #ffffff;">BUY ${sharesToBuy.toLocaleString()} SHARES</span>
         </div>
         <div class="metric-row">
-          <span class="label">Analyst Buy Skew:</span>
-          <span class="val">${s.buy_pct}% Buy (${s.buy_rec} Buy / ${s.sell_rec} Sell)</span>
+          <span class="label">Catalyst (Earnings):</span>
+          <span class="val" style="color: var(--accent-gold);">${s.earnings_date}</span>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <button class="add-wish-btn" style="background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%); color: #ffffff; border: none;" onclick="openOrderModal('${s.symbol}')">
+          📋 20% Order Ticket
+        </button>
+        <button class="remove-btn" title="Remove from Wishlist" onclick="toggleWishlist('${s.symbol}')">
+          🗑️ Remove
+        </button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// =========================================================================
+// RENDER VIEW 3: SCREENER UNIVERSE (25 STOCKS KEPT TO VIEW)
+// =========================================================================
+
+function renderUniverseGrid(maxClip) {
+  const grid = document.getElementById('universeGrid');
+  grid.innerHTML = '';
+
+  const wishlistSymbolSet = new Set(wishlistItems.map(x => x.symbol));
+
+  const filtered = universeList.filter(s => {
+    const matchesSector = currentUniverseFilter === 'ALL' || s.sector.toLowerCase().includes(currentUniverseFilter.toLowerCase());
+    const matchesSearch = s.symbol.toLowerCase().includes(currentUniverseSearch.toLowerCase()) || 
+                          s.name.toLowerCase().includes(currentUniverseSearch.toLowerCase());
+    return matchesSector && matchesSearch;
+  });
+
+  filtered.forEach(s => {
+    const isSaved = wishlistSymbolSet.has(s.symbol);
+    const sharesToBuy = s.price > 0 ? Math.floor(maxClip / s.price) : 0;
+
+    const card = document.createElement('div');
+    card.className = `stock-card ${isSaved ? 'is-wishlist' : ''}`;
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="header-main-row">
+          <div class="ticker-symbol">${s.symbol}</div>
+          <span class="signal-pill ${s.badge_color}">${s.signal}</span>
+        </div>
+        <div class="header-sub-row">
+          <div class="company-title" title="${s.name}">${s.name}</div>
+          <span class="sector-tag">${s.sector}</span>
+        </div>
+      </div>
+
+      <div class="price-row">
+        <div class="current-price">$${s.price.toFixed(2)}</div>
+        <div class="price-tag-group">
+          <div class="change-pct ${s.chg_1d >= 0 ? 'pos' : 'neg'}">
+            ${s.chg_1d >= 0 ? '+' : ''}${s.chg_1d.toFixed(2)}%
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-rows">
+        <div class="metric-row">
+          <span class="label">Wall St Target:</span>
+          <span class="val val-highlight">$${s.target.toFixed(2)} (+${s.upside_pct}%)</span>
+        </div>
+        <div class="metric-row">
+          <span class="label">Strict 7% Stop Loss:</span>
+          <span class="val val-stop">$${s.stop_loss.toFixed(2)} (-7.0%)</span>
+        </div>
+        <div class="metric-row">
+          <span class="label">Risk/Reward Ratio:</span>
+          <span class="val" style="color: var(--accent-cyan);">${s.rr_ratio}:1 Ratio</span>
+        </div>
+        <div class="metric-row">
+          <span class="label">20% Max Sizing:</span>
+          <span class="val" style="color: #ffffff;">BUY ${sharesToBuy.toLocaleString()} SHARES</span>
         </div>
         <div class="metric-row">
           <span class="label">Catalyst (Earnings):</span>
@@ -981,49 +1483,131 @@ function renderStocks() {
         </div>
       </div>
 
-      <!-- 1-Click Competition Order Generator -->
-      <button class="trade-btn" onclick="openModal('${s.symbol}')">
-        ⚡ Generate 20% Trade Ticket
-      </button>
+      <div class="card-actions">
+        <button class="add-wish-btn ${isSaved ? 'active' : ''}" onclick="toggleWishlist('${s.symbol}')">
+          ${isSaved ? '✓ On Wishlist (Click to Remove)' : '⭐ Add to Wishlist'}
+        </button>
+        <button class="ticket-btn" title="View Competition Order Ticket" onclick="openOrderModal('${s.symbol}')">
+          📋 Ticket
+        </button>
+      </div>
     `;
     grid.appendChild(card);
   });
 }
 
-function updateSizing() {
-  const cash = parseFloat(document.getElementById('cashInput').value) || 1000000;
-  const maxCap = cash * 0.20;
-  const riskBudget = maxCap * 0.07;
-  document.getElementById('maxCapDisplay').innerText = '$' + maxCap.toLocaleString(undefined, {maximumFractionDigits: 0});
-  document.getElementById('riskBudgetDisplay').innerText = '$' + riskBudget.toLocaleString(undefined, {maximumFractionDigits: 0});
-  renderStocks();
-}
-
 function filterSector(sector, btn) {
-  currentFilter = sector;
+  currentUniverseFilter = sector;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  renderStocks();
+  recalculateAll();
 }
 
-function searchStocks() {
-  currentSearch = document.getElementById('searchInput').value;
-  renderStocks();
+function searchUniverse() {
+  currentUniverseSearch = document.getElementById('universeSearchInput').value;
+  recalculateAll();
 }
+
+// =========================================================================
+// TOGGLE WISHLIST (EASILY ADD OR REMOVE BY CLICKING)
+// =========================================================================
+
+async function toggleWishlist(symbol) {
+  const exists = wishlistItems.some(x => x.symbol === symbol);
+
+  if (exists) {
+    wishlistItems = wishlistItems.filter(x => x.symbol !== symbol);
+    showToast(`🗑️ ${symbol} removed from Wishlist.`);
+    try {
+      await fetch('/api/wishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', item: { symbol } })
+      });
+    } catch (e) {}
+  } else {
+    const newItem = {
+      symbol: symbol,
+      notes: "Added from Screener Universe",
+      priority: "Medium"
+    };
+    wishlistItems = [newItem, ...wishlistItems];
+    showToast(`⭐ <b>${symbol}</b> added to your Wishlist!`);
+    try {
+      await fetch('/api/wishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'add', item: newItem })
+      });
+    } catch (e) {}
+  }
+
+  recalculateAll();
+}
+
+// =========================================================================
+// CUSTOM TICKER MODAL
+// =========================================================================
+
+function openAddCustomModal() {
+  document.getElementById('customTickerInput').value = '';
+  document.getElementById('customNotesInput').value = '';
+  document.getElementById('customTickerModal').style.display = 'flex';
+}
+
+function closeCustomTickerModal() {
+  document.getElementById('customTickerModal').style.display = 'none';
+}
+
+async function confirmAddCustom() {
+  const ticker = document.getElementById('customTickerInput').value.toUpperCase().trim();
+  const notes = document.getElementById('customNotesInput').value.trim();
+
+  if (!ticker) {
+    alert("Please enter a valid stock ticker symbol.");
+    return;
+  }
+
+  const newItem = {
+    symbol: ticker,
+    notes: notes || "Custom Watchlist Ticker",
+    priority: "High"
+  };
+
+  wishlistItems = [newItem, ...wishlistItems.filter(x => x.symbol !== ticker)];
+
+  try {
+    await fetch('/api/wishlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'add', item: newItem })
+    });
+  } catch (e) {}
+
+  closeCustomTickerModal();
+  recalculateAll();
+  showToast(`⭐ <b>${ticker}</b> added to your Wishlist!`);
+  switchPage('wishlist');
+}
+
+// =========================================================================
+// ORDER TICKET MODAL FOR CHAL <GO>
+// =========================================================================
 
 let selectedTicketText = '';
 
-function openModal(symbol) {
-  const stock = stocksData.find(s => s.symbol === symbol);
-  if (!stock) return;
+function openOrderModal(symbol) {
+  const stock = marketDb[symbol] || {
+    symbol: symbol, ticker: symbol + ' US Equity', name: symbol, price: 100, target: 130, upside_pct: 30, stop_loss: 93, rr_ratio: 4.3, earnings_date: 'TBD'
+  };
   const totalCash = parseFloat(document.getElementById('cashInput').value) || 1000000;
   const maxClip = totalCash * 0.20;
-  const shares = Math.floor(maxClip / stock.price);
+  const shares = stock.price > 0 ? Math.floor(maxClip / stock.price) : 0;
   const totalSpend = (shares * stock.price).toFixed(2);
   const potentialProfit = (shares * (stock.target - stock.price)).toFixed(2);
   const maxLoss = (shares * (stock.price - stock.stop_loss)).toFixed(2);
 
-  document.getElementById('modalTickerTitle').innerText = `${stock.symbol} — 20% Competition Trade Ticket`;
+  document.getElementById('modalTickerTitle').innerText = `${stock.symbol} — 20% Competition Trade Ticket (CHAL <GO>)`;
   
   selectedTicketText = `--- DALLAS COLLEGE TRADING CHALLENGE ORDER ---
 Security: ${stock.ticker} (${stock.name})
@@ -1058,12 +1642,6 @@ function closeModal() {
   document.getElementById('tradeModal').style.display = 'none';
 }
 
-function closeModalOnBg(e, modalId) {
-  if (e.target.id === modalId) {
-    document.getElementById(modalId).style.display = 'none';
-  }
-}
-
 function copyTicket() {
   navigator.clipboard.writeText(selectedTicketText).then(() => {
     const btn = document.getElementById('copyBtn');
@@ -1072,10 +1650,22 @@ function copyTicket() {
   });
 }
 
+function openDiagModal() {
+  document.getElementById('diagModal').style.display = 'flex';
+}
+
+function closeDiagModal() {
+  document.getElementById('diagModal').style.display = 'none';
+}
+
+function closeModalOnBg(e, modalId) {
+  if (e.target.id === modalId) {
+    document.getElementById(modalId).style.display = 'none';
+  }
+}
+
 // Initialize
-updateSizing();
-applyModeUI();
-setInterval(updateDynamicAge, 30000); // Check age every 30s
+recalculateAll();
 </script>
 </body>
 </html>

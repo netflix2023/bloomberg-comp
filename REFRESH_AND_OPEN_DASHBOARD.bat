@@ -15,6 +15,9 @@ if exist "%PYTHON_EXE%" (
 )
 
 echo.
-echo [Bloomberg Terminal] Opening Web Dashboard...
-start "" "%SCRIPT_DIR%index.html"
+if exist "%PYTHON_EXE%" (
+    start "" /b "%PYTHON_EXE%" "%SCRIPT_DIR%server.py" --open
+) else (
+    start "" /b python "%SCRIPT_DIR%server.py" --open
+)
 exit /b 0

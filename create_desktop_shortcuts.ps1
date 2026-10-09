@@ -33,4 +33,14 @@ $syncShareShortcut.Description = "Pull Bloomberg quotes and push to GitHub so yo
 $syncShareShortcut.IconLocation = "shell32.dll,14"
 $syncShareShortcut.Save()
 
+# 4. Bloomberg News & Watchlist Shortcut
+$newsBatPath = "C:\Users\e3402020\.gemini\antigravity-ide\scratch\bloomberg_market_data\OPEN_NEWS_TERMINAL.bat"
+$newsShortcutPath = Join-Path $desktopPath "Bloomberg News & Watchlist.lnk"
+$newsShortcut = $wshShell.CreateShortcut($newsShortcutPath)
+$newsShortcut.TargetPath = $newsBatPath
+$newsShortcut.WorkingDirectory = $workDir
+$newsShortcut.Description = "Open Bloomberg News Intelligence & Watchlist Flag Terminal"
+$newsShortcut.IconLocation = "shell32.dll,13"
+$newsShortcut.Save()
+
 Write-Output "Shortcuts created on Desktop."

@@ -21,7 +21,7 @@ if exist "%PYTHON_EXE%" (
 echo.
 echo [2/4] Staging updated market snapshot for Git...
 cd /d "%SCRIPT_DIR%"
-git add bloomberg_live_remote_dashboard.xlsx bloomberg_live_remote_screener.csv index.html dashboard.html generate_web_dashboard.py sync_remote_excel.py .gitignore
+git add bloomberg_live_remote_dashboard.xlsx bloomberg_live_remote_screener.csv index.html dashboard.html generate_web_dashboard.py sync_remote_excel.py current_holdings.json wishlist.json server.py .gitignore
 
 echo.
 echo [3/4] Pushing updates to GitHub (so your friend's dashboard updates)...
@@ -30,7 +30,11 @@ git push origin main
 
 echo.
 echo [4/4] Opening updated dashboard in your browser...
-start "" "%SCRIPT_DIR%index.html"
+if exist "%PYTHON_EXE%" (
+    start "" /b "%PYTHON_EXE%" "%SCRIPT_DIR%server.py" --open
+) else (
+    start "" /b python "%SCRIPT_DIR%server.py" --open
+)
 
 echo.
 echo ========================================================
