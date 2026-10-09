@@ -1,7 +1,7 @@
 """
 Bloomberg Trading Challenge - Web Dashboard Generator
 Generates an interactive HTML dashboard (index.html / dashboard.html)
-with dual-mode support:
+with dual-mode support and prominent, permanent "Last Synced" indicators:
   - LIVE API MODE (Connected to Bloomberg Desktop API 127.0.0.1:8194)
   - OFFLINE / CACHED SNAPSHOT MODE (Preserves historical market-close data)
 """
@@ -34,17 +34,20 @@ def generate_dashboard():
     age_seconds = (now - csv_mtime).total_seconds()
     days_ago = int(age_seconds // 86400)
     hours_ago = int((age_seconds % 86400) // 3600)
+    mins_ago = int((age_seconds % 3600) // 60)
     
     if days_ago > 0:
         age_label = f"{days_ago} day{'s' if days_ago > 1 else ''} ago"
     elif hours_ago > 0:
         age_label = f"{hours_ago} hour{'s' if hours_ago > 1 else ''} ago"
+    elif mins_ago > 0:
+        age_label = f"{mins_ago} min{'s' if mins_ago > 1 else ''} ago"
     else:
         age_label = "Just now"
 
     # Check live Bloomberg API connection and data recency
     is_port_open = check_bloomberg_port()
-    # If the data was synced via Bloomberg API within the last 60 minutes, it is active live data
+    # Data is considered live if synced within 60 minutes
     is_live_data = (age_seconds < 3600)
 
     df = pd.read_csv(csv_path)
@@ -117,6 +120,7 @@ def generate_dashboard():
         "is_live": is_live_data,
         "is_port_open": is_port_open,
         "csv_timestamp": csv_time_str,
+        "csv_mtime_epoch": int(csv_mtime.timestamp()),
         "age_label": age_label,
         "connection_protocol": "Bloomberg Desktop API (BLPAPI / bbcomm.exe on 127.0.0.1:8194)",
         "feed_mode": "LIVE_API" if is_live_data else "OFFLINE_CACHED"
@@ -274,6 +278,35 @@ def generate_dashboard():
       color: var(--text-muted);
       font-size: 14px;
     }}
+
+    .header-badges {{
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }}
+    .sync-timestamp-badge {{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+    }}
+    .sync-timestamp-badge b {{
+      color: var(--accent-cyan);
+    }}
+    .age-pill {{
+      background: rgba(255, 255, 255, 0.12);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      color: #94a3b8;
+    }}
     .feed-info-tag {{
       display: inline-flex;
       align-items: center;
@@ -281,9 +314,9 @@ def generate_dashboard():
       background: #111726;
       border: 1px solid var(--card-border);
       color: var(--text-muted);
-      padding: 8px 16px;
-      border-radius: 10px;
-      font-size: 13px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
       font-family: 'JetBrains Mono', monospace;
     }}
 
@@ -660,13 +693,28 @@ def generate_dashboard():
       cursor: pointer;
       font-size: 14px;
     }}
+
+    /* Footer */
+    .terminal-footer {{
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }}
   </style>
 </head>
 <body>
 
 <div class="container">
 
-  <!-- TOP LIVE VS OFFLINE STATUS BANNER -->
+  <!-- TOP LIVE VS OFFLINE STATUS BANNER (ALWAYS INCLUDES SYNC TIME) -->
   <div id="modeBanner" class="mode-banner offline">
     <div class="mode-left">
       <div id="modePill" class="mode-pill offline">
@@ -674,8 +722,7 @@ def generate_dashboard():
         <span id="modeText">OFFLINE SNAPSHOT</span>
       </div>
       <div>
-        <span id="bannerSummary"><b>Data Source:</b> October 06, 2026 at 05:00 PM (Market Close)</span>
-        <span style="opacity: 0.8; margin-left: 8px;">• Bloomberg Terminal API: <b>Disconnected</b></span>
+        <span id="bannerSummary"><b>Last Synced:</b> {csv_time_str} (<span id="bannerAgeText">{age_label}</span>) • Bloomberg API: <b>Offline</b></span>
       </div>
     </div>
     <div class="mode-right">
@@ -685,16 +732,22 @@ def generate_dashboard():
     </div>
   </div>
 
-  <!-- Main Header -->
+  <!-- Main Header with Permanent Last Synced Badge -->
   <div class="header">
     <div class="title-group">
       <h1>Bloomberg Global Trading Challenge — Dallas College</h1>
       <p>Quantitative Decision, Risk-Reward & 20% Position-Sizing Terminal</p>
     </div>
-    <div class="feed-info-tag">
-      <span>Protocol: <b>BLPAPI (127.0.0.1:8194)</b></span>
-      <span style="color: #475569;">|</span>
-      <span id="feedStatusLabel">Status: <b>Cached File</b></span>
+    <div class="header-badges">
+      <div class="sync-timestamp-badge">
+        <span>🕒 Last Synced: <b id="headerSyncTime">{csv_time_str}</b></span>
+        <span id="headerSyncAge" class="age-pill">({age_label})</span>
+      </div>
+      <div class="feed-info-tag">
+        <span>Protocol: <b>BLPAPI (127.0.0.1:8194)</b></span>
+        <span style="color: #475569;">|</span>
+        <span id="feedStatusLabel">Status: <b>Live Feed</b></span>
+      </div>
     </div>
   </div>
 
@@ -750,6 +803,13 @@ def generate_dashboard():
 
   <!-- Stock Cards Grid -->
   <div class="stocks-grid" id="stocksGrid"></div>
+
+  <!-- Footer with Permanent Timestamp Stamp -->
+  <footer class="terminal-footer">
+    <div>Dallas College Bloomberg Global Trading Challenge • WLS Index Universe</div>
+    <div>Data Engine: <b>Bloomberg BLPAPI (127.0.0.1:8194)</b></div>
+    <div>Last Terminal Extraction: <b style="color: var(--accent-cyan);">{csv_time_str}</b></div>
+  </footer>
 </div>
 
 <!-- Diagnostics Modal -->
@@ -760,40 +820,39 @@ def generate_dashboard():
       <button class="close-btn" onclick="closeDiagModal()">&times;</button>
     </div>
     <p style="font-size: 13px; color: var(--text-muted);">
-      Detailed breakdown of your data connection, protocol, and cache state:
+      Detailed breakdown of your data connection, protocol, and exact synchronization time:
     </p>
     <table class="diag-table">
+      <tr>
+        <td>Exact Last Sync Time</td>
+        <td style="color: var(--accent-cyan); font-weight: 700;">{csv_time_str}</td>
+      </tr>
+      <tr>
+        <td>Data Freshness Age</td>
+        <td id="diagDataAge">{age_label}</td>
+      </tr>
       <tr>
         <td>Connection Type</td>
         <td id="diagConnType">Bloomberg Desktop API (BLPAPI / bbcomm.exe)</td>
       </tr>
       <tr>
         <td>Local Daemon Port</td>
-        <td>127.0.0.1:8194 (TCP)</td>
+        <td>127.0.0.1:8194 (TCP Loopback)</td>
       </tr>
       <tr>
         <td>Terminal Active Now?</td>
-        <td id="diagPortStatus" style="color: var(--accent-red);">🔴 Disconnected (bbcomm not running)</td>
-      </tr>
-      <tr>
-        <td>Data Provenance</td>
-        <td id="diagDataAge">Oct 06, 2026 Market Close Snapshot</td>
+        <td id="diagPortStatus">Checking...</td>
       </tr>
       <tr>
         <td>File Source</td>
         <td>bloomberg_live_remote_screener.csv</td>
       </tr>
-      <tr>
-        <td>Auto-refresh in browser</td>
-        <td>Disabled (Snapshot model preserves battery/memory)</td>
-      </tr>
     </table>
     <div style="background: rgba(30, 41, 59, 0.5); padding: 12px; border-radius: 8px; font-size: 12px; color: var(--text-muted);">
-      <b>How to switch to LIVE feed:</b><br>
-      1. Log into your Bloomberg account on the Dallas College lab computer.<br>
-      2. Verify <code>bbcomm.exe</code> is active in Task Manager.<br>
-      3. Double-click <b>Update & Open Bloomberg Data</b> on your Desktop.<br>
-      4. Fresh market quotes will immediately replace this offline cache.
+      <b>How to sync newer quotes from the terminal:</b><br>
+      1. Open the Bloomberg terminal in the Dallas College lab.<br>
+      2. Double-click <b>Sync & Share with Friend</b> on your Desktop.<br>
+      3. Fresh market quotes will immediately sync locally and push to GitHub.
     </div>
   </div>
 </div>
@@ -820,7 +879,37 @@ let isSimulatedLive = false;
 let currentFilter = 'ALL';
 let currentSearch = '';
 
-// Initialize connection banner
+// Live Dynamic Age Calculator (updates every minute)
+function updateDynamicAge() {{
+  const epoch = statusMeta.csv_mtime_epoch;
+  if (!epoch) return;
+  const nowSec = Math.floor(Date.now() / 1000);
+  const diff = nowSec - epoch;
+  let label = "Just now";
+  if (diff >= 86400) {{
+    const d = Math.floor(diff / 86400);
+    label = d + (d === 1 ? " day ago" : " days ago");
+  }} else if (diff >= 3600) {{
+    const h = Math.floor(diff / 3600);
+    label = h + (h === 1 ? " hr ago" : " hrs ago");
+  }} else if (diff >= 60) {{
+    const m = Math.floor(diff / 60);
+    label = m + (m === 1 ? " min ago" : " mins ago");
+  }} else if (diff > 5) {{
+    label = diff + " sec ago";
+  }} else {{
+    label = "Just now";
+  }}
+  
+  const elBanner = document.getElementById('bannerAgeText');
+  if (elBanner) elBanner.innerText = label;
+  const elHeader = document.getElementById('headerSyncAge');
+  if (elHeader) elHeader.innerText = "(" + label + ")";
+  const elDiag = document.getElementById('diagDataAge');
+  if (elDiag) elDiag.innerText = label;
+}}
+
+// Initialize connection banner and sync info
 function applyModeUI() {{
   const isCurrentlyLive = isSimulatedLive || statusMeta.is_live;
   const banner = document.getElementById('modeBanner');
@@ -830,27 +919,25 @@ function applyModeUI() {{
   const summary = document.getElementById('bannerSummary');
   const feedLabel = document.getElementById('feedStatusLabel');
   const diagPort = document.getElementById('diagPortStatus');
-  const diagAge = document.getElementById('diagDataAge');
 
   if (isCurrentlyLive) {{
     banner.className = 'mode-banner live';
     pill.className = 'mode-pill live';
     dot.className = 'pulse-dot live';
     text.innerText = 'LIVE API FEED';
-    summary.innerHTML = '<b>Active Feed:</b> Bloomberg Desktop API connected (127.0.0.1:8194) • Real-time quotes synced';
-    feedLabel.innerHTML = 'Status: <b style="color: var(--accent-green);">● Live BLPAPI</b>';
-    diagPort.innerHTML = '<span style="color: var(--accent-green);">🟢 Connected (127.0.0.1:8194 active)</span>';
-    diagAge.innerText = 'Live Feed Synced Just Now';
+    summary.innerHTML = '<b>Last Synced:</b> ' + statusMeta.csv_timestamp + ' (<span id="bannerAgeText">' + statusMeta.age_label + '</span>) • Bloomberg API (127.0.0.1:8194): <b style="color: var(--accent-green);">Connected</b>';
+    feedLabel.innerHTML = 'Status: <b style="color: var(--accent-green);">● Live BLPAPI Feed</b>';
+    diagPort.innerHTML = '<span style="color: var(--accent-green);">🟢 Connected (Active Session)</span>';
   }} else {{
     banner.className = 'mode-banner offline';
     pill.className = 'mode-pill offline';
     dot.className = 'pulse-dot offline';
     text.innerText = 'OFFLINE SNAPSHOT';
-    summary.innerHTML = '<b>Data Source:</b> ' + statusMeta.csv_timestamp + ' (' + statusMeta.age_label + ') • Terminal API: <b>Offline</b>';
+    summary.innerHTML = '<b>Last Synced:</b> ' + statusMeta.csv_timestamp + ' (<span id="bannerAgeText">' + statusMeta.age_label + '</span>) • Bloomberg API (127.0.0.1:8194): <b>Offline</b>';
     feedLabel.innerHTML = 'Status: <b style="color: var(--accent-amber);">Cached Snapshot</b>';
-    diagPort.innerHTML = '<span style="color: var(--accent-red);">🔴 Disconnected (bbcomm not running)</span>';
-    diagAge.innerText = statusMeta.csv_timestamp + ' (' + statusMeta.age_label + ')';
+    diagPort.innerHTML = '<span style="color: var(--accent-red);">🔴 Disconnected (bbcomm offline)</span>';
   }}
+  updateDynamicAge();
   renderStocks();
 }}
 
@@ -885,7 +972,7 @@ function renderStocks() {{
     const sharesToBuy = s.price > 0 ? Math.floor(maxClip / s.price) : 0;
     const badgeHtml = isCurrentlyLive
       ? '<span class="state-badge live">● LIVE</span>'
-      : '<span class="state-badge offline">CACHED 10/06</span>';
+      : '<span class="state-badge offline">CACHED</span>';
 
     const card = document.createElement('div');
     card.className = 'stock-card';
@@ -1028,6 +1115,7 @@ function copyTicket() {{
 // Initialize
 updateSizing();
 applyModeUI();
+setInterval(updateDynamicAge, 30000); // Check age every 30s
 </script>
 </body>
 </html>
@@ -1041,10 +1129,9 @@ applyModeUI();
     with open(html_file2, "w", encoding="utf-8") as f:
         f.write(html_content)
 
-    print(f"Generated web dashboard with Live vs Offline status:")
+    print(f"Generated web dashboard with permanent Last Synced stamps:")
     print(f"  - Mode: {'LIVE API' if is_live_data else 'OFFLINE SNAPSHOT'}")
-    print(f"  - Daemon Port 8194: {'ONLINE' if is_port_open else 'OFFLINE'}")
-    print(f"  - Source Timestamp: {csv_time_str} ({age_label})")
+    print(f"  - Exact Sync Timestamp: {csv_time_str} ({age_label})")
     print(f"  - Saved to: {html_file1}")
     return html_file1
 
