@@ -1,7 +1,7 @@
 """
 Bloomberg Trading Challenge - Web Dashboard Generator
 Generates an interactive HTML dashboard (index.html / dashboard.html)
-with dual-mode support and prominent, permanent "Last Synced" indicators:
+with dual-mode support, permanent "Last Synced" indicators, and polished UI:
   - LIVE API MODE (Connected to Bloomberg Desktop API 127.0.0.1:8194)
   - OFFLINE / CACHED SNAPSHOT MODE (Preserves historical market-close data)
 """
@@ -143,7 +143,7 @@ def generate_dashboard():
       --card-border: #1e293b;
       --accent-cyan: #00e5ff;
       --accent-green: #00e676;
-      --accent-red: #ff3d71;
+      --accent-red: #ff3366;
       --accent-gold: #ffb300;
       --accent-amber: #f59e0b;
       --text-main: #f8fafc;
@@ -162,7 +162,7 @@ def generate_dashboard():
       line-height: 1.5;
     }}
     .container {{
-      max-width: 1400px;
+      max-width: 1440px;
       margin: 0 auto;
     }}
 
@@ -374,7 +374,7 @@ def generate_dashboard():
       border-color: var(--accent-cyan);
     }}
 
-    /* How-To Guide */
+    /* How-To Guide Banner */
     .guide-banner {{
       background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(17, 23, 38, 0.9) 100%);
       border: 1px solid #334155;
@@ -388,24 +388,56 @@ def generate_dashboard():
       flex-wrap: wrap;
       gap: 16px;
     }}
-    .guide-banner h3 {{
+    .guide-content h3 {{
       font-size: 15px;
       font-weight: 700;
       color: #ffffff;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }}
-    .guide-banner p {{
+    .guide-steps {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
       font-size: 13px;
       color: var(--text-muted);
-      max-width: 900px;
+    }}
+    .step-chip {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid #334155;
+      padding: 4px 10px;
+      border-radius: 6px;
+      color: #cbd5e1;
+    }}
+    .step-chip b {{
+      background: var(--accent-cyan);
+      color: #090d16;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }}
+    .step-chip code {{
+      background: #090d16;
+      color: var(--accent-gold);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
     }}
     .guide-badge {{
       background: rgba(0, 229, 255, 0.15);
+      border: 1px solid rgba(0, 229, 255, 0.3);
       color: var(--accent-cyan);
-      padding: 6px 14px;
+      padding: 8px 16px;
       border-radius: 8px;
       font-weight: 700;
       font-size: 12px;
+      white-space: nowrap;
     }}
 
     /* Controls */
@@ -437,22 +469,36 @@ def generate_dashboard():
       background: #1e293b;
       color: #ffffff;
       border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.15);
+    }}
+    .search-box-wrapper {{
+      position: relative;
+      display: flex;
+      align-items: center;
     }}
     .search-box {{
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       color: #ffffff;
-      padding: 10px 16px;
+      padding: 10px 16px 10px 38px;
       border-radius: 10px;
       font-size: 14px;
       outline: none;
-      width: 260px;
+      width: 280px;
+      transition: border-color 0.2s;
     }}
     .search-box:focus {{
       border-color: var(--accent-cyan);
     }}
+    .search-icon {{
+      position: absolute;
+      left: 12px;
+      color: var(--text-muted);
+      font-size: 14px;
+      pointer-events: none;
+    }}
 
-    /* Stock Cards Grid */
+    /* Stock Cards Grid - Fixed Overflow & Clean Header */
     .stocks-grid {{
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -462,54 +508,48 @@ def generate_dashboard():
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 16px;
-      padding: 22px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       gap: 14px;
       position: relative;
       transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      overflow: hidden;
     }}
     .stock-card:hover {{
       transform: translateY(-4px);
       border-color: #3b82f6;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
     }}
-    .card-top {{
+
+    /* Card Header: 2 Clean Rows to prevent any badge overflow */
+    .card-header {{
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }}
+    .header-main-row {{
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-    }}
-    .ticker-name h2 {{
-      font-size: 20px;
-      font-weight: 800;
-      color: #ffffff;
-      display: flex;
       align-items: center;
       gap: 8px;
     }}
-    .sector-tag {{
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-muted);
-      background: #1e293b;
-      padding: 2px 8px;
-      border-radius: 6px;
-      text-transform: uppercase;
-    }}
-    .company-title {{
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 2px;
+    .ticker-symbol {{
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      font-family: 'JetBrains Mono', monospace;
     }}
     .signal-pill {{
       font-size: 11px;
       font-weight: 800;
-      padding: 4px 10px;
+      padding: 4px 8px;
       border-radius: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       white-space: nowrap;
+      text-align: right;
     }}
     .signal-pill.success {{
       background: rgba(0, 230, 118, 0.15);
@@ -526,6 +566,35 @@ def generate_dashboard():
       color: var(--text-muted);
       border: 1px solid rgba(148, 163, 184, 0.3);
     }}
+
+    .header-sub-row {{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }}
+    .company-title {{
+      color: var(--text-muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 60%;
+    }}
+    .sector-tag {{
+      font-size: 10px;
+      font-weight: 700;
+      color: #94a3b8;
+      background: #1e293b;
+      padding: 2px 7px;
+      border-radius: 5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      letter-spacing: 0.3px;
+    }}
+
+    /* Price Row with High Contrast */
     .price-row {{
       display: flex;
       justify-content: space-between;
@@ -537,6 +606,7 @@ def generate_dashboard():
       font-size: 26px;
       font-weight: 800;
       font-family: 'JetBrains Mono', monospace;
+      color: #ffffff;
     }}
     .price-tag-group {{
       display: flex;
@@ -567,17 +637,23 @@ def generate_dashboard():
       font-family: 'JetBrains Mono', monospace;
     }}
     .change-pct.pos {{ color: var(--accent-green); }}
-    .change-pct.neg {{ color: var(--accent-red); }}
+    .change-pct.neg {{ color: #ff3366; }}
 
+    /* Tinted Metrics Box for Institutional Look */
     .metric-rows {{
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
+      background: rgba(9, 13, 22, 0.6);
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #1e293b;
     }}
     .metric-row {{
       display: flex;
       justify-content: space-between;
-      font-size: 13px;
+      align-items: center;
+      font-size: 12.5px;
     }}
     .metric-row .label {{
       color: var(--text-muted);
@@ -587,7 +663,7 @@ def generate_dashboard():
       font-family: 'JetBrains Mono', monospace;
     }}
     .val-highlight {{ color: var(--accent-green); }}
-    .val-stop {{ color: var(--accent-red); }}
+    .val-stop {{ color: #ff3366; }}
 
     .trade-btn {{
       background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
@@ -602,11 +678,14 @@ def generate_dashboard():
       justify-content: center;
       align-items: center;
       gap: 8px;
-      transition: filter 0.2s;
-      margin-top: 4px;
+      transition: filter 0.2s, transform 0.1s;
+      margin-top: 2px;
     }}
     .trade-btn:hover {{
       filter: brightness(1.15);
+    }}
+    .trade-btn:active {{
+      transform: scale(0.98);
     }}
 
     /* Diagnostic Modal */
@@ -714,7 +793,7 @@ def generate_dashboard():
 
 <div class="container">
 
-  <!-- TOP LIVE VS OFFLINE STATUS BANNER (ALWAYS INCLUDES SYNC TIME) -->
+  <!-- TOP LIVE VS OFFLINE STATUS BANNER -->
   <div id="modeBanner" class="mode-banner offline">
     <div class="mode-left">
       <div id="modePill" class="mode-pill offline">
@@ -775,17 +854,17 @@ def generate_dashboard():
     </div>
   </div>
 
-  <!-- Beginner Guide Banner -->
+  <!-- Beginner Guide Banner with 3 Clean Steps -->
   <div class="guide-banner">
-    <div>
+    <div class="guide-content">
       <h3>🚀 How To Execute Competition Trades</h3>
-      <p>
-        1) Filter or search for candidates with <b>3:1+ R:R</b> and high <b>Wall St Upside</b>.
-        2) Click <b>"Generate 20% Trade Ticket"</b> to calculate exact competition share counts.
-        3) On the lab terminal, type <code>CHAL &lt;GO&gt;</code> and execute the pre-calculated ticket.
-      </p>
+      <div class="guide-steps">
+        <span class="step-chip"><b>1</b> Screen candidates with 3:1+ R:R & Target Upside</span>
+        <span class="step-chip"><b>2</b> Click "Generate 20% Trade Ticket" for share counts</span>
+        <span class="step-chip"><b>3</b> Execute in terminal via <code>CHAL &lt;GO&gt;</code></span>
+      </div>
     </div>
-    <div class="guide-badge">20% Cap Enforced</div>
+    <div class="guide-badge">20% Position Cap Enforced</div>
   </div>
 
   <!-- Controls -->
@@ -798,7 +877,10 @@ def generate_dashboard():
       <button class="filter-btn" onclick="filterSector('Financials', this)">Financials</button>
       <button class="filter-btn" onclick="filterSector('Consumer', this)">Consumer</button>
     </div>
-    <input type="text" id="searchInput" class="search-box" placeholder="Search ticker or company..." oninput="searchStocks()">
+    <div class="search-box-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" class="search-box" placeholder="Search ticker or company..." oninput="searchStocks()">
+    </div>
   </div>
 
   <!-- Stock Cards Grid -->
@@ -977,14 +1059,19 @@ function renderStocks() {{
     const card = document.createElement('div');
     card.className = 'stock-card';
     card.innerHTML = `
-      <div class="card-top">
-        <div class="ticker-name">
-          <h2>${{s.symbol}} <span class="sector-tag">${{s.sector}}</span></h2>
-          <div class="company-title">${{s.name}}</div>
+      <!-- Clean 2-Row Header (Zero Overflow) -->
+      <div class="card-header">
+        <div class="header-main-row">
+          <div class="ticker-symbol">${{s.symbol}}</div>
+          <span class="signal-pill ${{s.badge_color}}">${{s.signal}}</span>
         </div>
-        <span class="signal-pill ${{s.badge_color}}">${{s.signal}}</span>
+        <div class="header-sub-row">
+          <div class="company-title" title="${{s.name}}">${{s.name}}</div>
+          <span class="sector-tag">${{s.sector}}</span>
+        </div>
       </div>
 
+      <!-- Price Row -->
       <div class="price-row">
         <div class="current-price">$${{s.price.toFixed(2)}}</div>
         <div class="price-tag-group">
@@ -995,9 +1082,10 @@ function renderStocks() {{
         </div>
       </div>
 
+      <!-- Institutional Metrics Box -->
       <div class="metric-rows">
         <div class="metric-row">
-          <span class="label">Wall St Target Price:</span>
+          <span class="label">Wall St Target:</span>
           <span class="val val-highlight">$${{s.target.toFixed(2)}} (+${{s.upside_pct}}%)</span>
         </div>
         <div class="metric-row">
@@ -1013,15 +1101,16 @@ function renderStocks() {{
           <span class="val" style="color: #ffffff;">BUY ${{sharesToBuy.toLocaleString()}} SHARES</span>
         </div>
         <div class="metric-row">
-          <span class="label">Analyst Consensus:</span>
+          <span class="label">Analyst Buy Skew:</span>
           <span class="val">${{s.buy_pct}}% Buy (${{s.buy_rec}} Buy / ${{s.sell_rec}} Sell)</span>
         </div>
         <div class="metric-row">
-          <span class="label">Catalyst (Earnings Date):</span>
+          <span class="label">Catalyst (Earnings):</span>
           <span class="val" style="color: var(--accent-gold);">${{s.earnings_date}}</span>
         </div>
       </div>
 
+      <!-- 1-Click Competition Order Generator -->
       <button class="trade-btn" onclick="openModal('${{s.symbol}}')">
         ⚡ Generate 20% Trade Ticket
       </button>
@@ -1085,9 +1174,9 @@ Catalyst Date: ${{stock.earnings_date}}
     <div class="ticket-line"><span>Quantity:</span><span style="color: var(--accent-cyan); font-weight: 700;">${{shares.toLocaleString()}} Shares</span></div>
     <div class="ticket-line"><span>Total Position Value:</span><span>$${{Number(totalSpend).toLocaleString()}}</span></div>
     <div class="ticket-line"><span>Wall St Target:</span><span style="color: var(--accent-green);">$${{stock.target.toFixed(2)}} (+${{stock.upside_pct}}%)</span></div>
-    <div class="ticket-line"><span>Strict 7% Stop-Loss:</span><span style="color: var(--accent-red);">$${{stock.stop_loss.toFixed(2)}}</span></div>
+    <div class="ticket-line"><span>Strict 7% Stop-Loss:</span><span style="color: #ff3366;">$${{stock.stop_loss.toFixed(2)}}</span></div>
     <div class="ticket-line"><span>Upside Payoff:</span><span style="color: var(--accent-green);">+$${{Number(potentialProfit).toLocaleString()}}</span></div>
-    <div class="ticket-line"><span>Downside Risk:</span><span style="color: var(--accent-red);">-$${{Number(maxLoss).toLocaleString()}}</span></div>
+    <div class="ticket-line"><span>Downside Risk:</span><span style="color: #ff3366;">-$${{Number(maxLoss).toLocaleString()}}</span></div>
     <div class="ticket-line"><span>Upcoming Catalyst:</span><span style="color: var(--accent-gold);">${{stock.earnings_date}}</span></div>
   `;
 
@@ -1129,7 +1218,7 @@ setInterval(updateDynamicAge, 30000); // Check age every 30s
     with open(html_file2, "w", encoding="utf-8") as f:
         f.write(html_content)
 
-    print(f"Generated web dashboard with permanent Last Synced stamps:")
+    print(f"Generated web dashboard with polished UI & fixed card header layout:")
     print(f"  - Mode: {'LIVE API' if is_live_data else 'OFFLINE SNAPSHOT'}")
     print(f"  - Exact Sync Timestamp: {csv_time_str} ({age_label})")
     print(f"  - Saved to: {html_file1}")

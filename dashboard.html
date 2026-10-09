@@ -14,7 +14,7 @@
       --card-border: #1e293b;
       --accent-cyan: #00e5ff;
       --accent-green: #00e676;
-      --accent-red: #ff3d71;
+      --accent-red: #ff3366;
       --accent-gold: #ffb300;
       --accent-amber: #f59e0b;
       --text-main: #f8fafc;
@@ -33,7 +33,7 @@
       line-height: 1.5;
     }
     .container {
-      max-width: 1400px;
+      max-width: 1440px;
       margin: 0 auto;
     }
 
@@ -245,7 +245,7 @@
       border-color: var(--accent-cyan);
     }
 
-    /* How-To Guide */
+    /* How-To Guide Banner */
     .guide-banner {
       background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(17, 23, 38, 0.9) 100%);
       border: 1px solid #334155;
@@ -259,24 +259,56 @@
       flex-wrap: wrap;
       gap: 16px;
     }
-    .guide-banner h3 {
+    .guide-content h3 {
       font-size: 15px;
       font-weight: 700;
       color: #ffffff;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
-    .guide-banner p {
+    .guide-steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
       font-size: 13px;
       color: var(--text-muted);
-      max-width: 900px;
+    }
+    .step-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid #334155;
+      padding: 4px 10px;
+      border-radius: 6px;
+      color: #cbd5e1;
+    }
+    .step-chip b {
+      background: var(--accent-cyan);
+      color: #090d16;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }
+    .step-chip code {
+      background: #090d16;
+      color: var(--accent-gold);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
     }
     .guide-badge {
       background: rgba(0, 229, 255, 0.15);
+      border: 1px solid rgba(0, 229, 255, 0.3);
       color: var(--accent-cyan);
-      padding: 6px 14px;
+      padding: 8px 16px;
       border-radius: 8px;
       font-weight: 700;
       font-size: 12px;
+      white-space: nowrap;
     }
 
     /* Controls */
@@ -308,22 +340,36 @@
       background: #1e293b;
       color: #ffffff;
       border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.15);
+    }
+    .search-box-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
     }
     .search-box {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       color: #ffffff;
-      padding: 10px 16px;
+      padding: 10px 16px 10px 38px;
       border-radius: 10px;
       font-size: 14px;
       outline: none;
-      width: 260px;
+      width: 280px;
+      transition: border-color 0.2s;
     }
     .search-box:focus {
       border-color: var(--accent-cyan);
     }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--text-muted);
+      font-size: 14px;
+      pointer-events: none;
+    }
 
-    /* Stock Cards Grid */
+    /* Stock Cards Grid - Fixed Overflow & Clean Header */
     .stocks-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -333,54 +379,48 @@
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 16px;
-      padding: 22px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       gap: 14px;
       position: relative;
       transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      overflow: hidden;
     }
     .stock-card:hover {
       transform: translateY(-4px);
       border-color: #3b82f6;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
     }
-    .card-top {
+
+    /* Card Header: 2 Clean Rows to prevent any badge overflow */
+    .card-header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .header-main-row {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-    }
-    .ticker-name h2 {
-      font-size: 20px;
-      font-weight: 800;
-      color: #ffffff;
-      display: flex;
       align-items: center;
       gap: 8px;
     }
-    .sector-tag {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-muted);
-      background: #1e293b;
-      padding: 2px 8px;
-      border-radius: 6px;
-      text-transform: uppercase;
-    }
-    .company-title {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 2px;
+    .ticker-symbol {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      font-family: 'JetBrains Mono', monospace;
     }
     .signal-pill {
       font-size: 11px;
       font-weight: 800;
-      padding: 4px 10px;
+      padding: 4px 8px;
       border-radius: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       white-space: nowrap;
+      text-align: right;
     }
     .signal-pill.success {
       background: rgba(0, 230, 118, 0.15);
@@ -397,6 +437,35 @@
       color: var(--text-muted);
       border: 1px solid rgba(148, 163, 184, 0.3);
     }
+
+    .header-sub-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .company-title {
+      color: var(--text-muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 60%;
+    }
+    .sector-tag {
+      font-size: 10px;
+      font-weight: 700;
+      color: #94a3b8;
+      background: #1e293b;
+      padding: 2px 7px;
+      border-radius: 5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      letter-spacing: 0.3px;
+    }
+
+    /* Price Row with High Contrast */
     .price-row {
       display: flex;
       justify-content: space-between;
@@ -408,6 +477,7 @@
       font-size: 26px;
       font-weight: 800;
       font-family: 'JetBrains Mono', monospace;
+      color: #ffffff;
     }
     .price-tag-group {
       display: flex;
@@ -438,17 +508,23 @@
       font-family: 'JetBrains Mono', monospace;
     }
     .change-pct.pos { color: var(--accent-green); }
-    .change-pct.neg { color: var(--accent-red); }
+    .change-pct.neg { color: #ff3366; }
 
+    /* Tinted Metrics Box for Institutional Look */
     .metric-rows {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
+      background: rgba(9, 13, 22, 0.6);
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #1e293b;
     }
     .metric-row {
       display: flex;
       justify-content: space-between;
-      font-size: 13px;
+      align-items: center;
+      font-size: 12.5px;
     }
     .metric-row .label {
       color: var(--text-muted);
@@ -458,7 +534,7 @@
       font-family: 'JetBrains Mono', monospace;
     }
     .val-highlight { color: var(--accent-green); }
-    .val-stop { color: var(--accent-red); }
+    .val-stop { color: #ff3366; }
 
     .trade-btn {
       background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
@@ -473,11 +549,14 @@
       justify-content: center;
       align-items: center;
       gap: 8px;
-      transition: filter 0.2s;
-      margin-top: 4px;
+      transition: filter 0.2s, transform 0.1s;
+      margin-top: 2px;
     }
     .trade-btn:hover {
       filter: brightness(1.15);
+    }
+    .trade-btn:active {
+      transform: scale(0.98);
     }
 
     /* Diagnostic Modal */
@@ -585,7 +664,7 @@
 
 <div class="container">
 
-  <!-- TOP LIVE VS OFFLINE STATUS BANNER (ALWAYS INCLUDES SYNC TIME) -->
+  <!-- TOP LIVE VS OFFLINE STATUS BANNER -->
   <div id="modeBanner" class="mode-banner offline">
     <div class="mode-left">
       <div id="modePill" class="mode-pill offline">
@@ -593,7 +672,7 @@
         <span id="modeText">OFFLINE SNAPSHOT</span>
       </div>
       <div>
-        <span id="bannerSummary"><b>Last Synced:</b> October 09, 2026 at 03:11 PM (<span id="bannerAgeText">2 mins ago</span>) • Bloomberg API: <b>Offline</b></span>
+        <span id="bannerSummary"><b>Last Synced:</b> October 09, 2026 at 03:11 PM (<span id="bannerAgeText">5 mins ago</span>) • Bloomberg API: <b>Offline</b></span>
       </div>
     </div>
     <div class="mode-right">
@@ -612,7 +691,7 @@
     <div class="header-badges">
       <div class="sync-timestamp-badge">
         <span>🕒 Last Synced: <b id="headerSyncTime">October 09, 2026 at 03:11 PM</b></span>
-        <span id="headerSyncAge" class="age-pill">(2 mins ago)</span>
+        <span id="headerSyncAge" class="age-pill">(5 mins ago)</span>
       </div>
       <div class="feed-info-tag">
         <span>Protocol: <b>BLPAPI (127.0.0.1:8194)</b></span>
@@ -646,17 +725,17 @@
     </div>
   </div>
 
-  <!-- Beginner Guide Banner -->
+  <!-- Beginner Guide Banner with 3 Clean Steps -->
   <div class="guide-banner">
-    <div>
+    <div class="guide-content">
       <h3>🚀 How To Execute Competition Trades</h3>
-      <p>
-        1) Filter or search for candidates with <b>3:1+ R:R</b> and high <b>Wall St Upside</b>.
-        2) Click <b>"Generate 20% Trade Ticket"</b> to calculate exact competition share counts.
-        3) On the lab terminal, type <code>CHAL &lt;GO&gt;</code> and execute the pre-calculated ticket.
-      </p>
+      <div class="guide-steps">
+        <span class="step-chip"><b>1</b> Screen candidates with 3:1+ R:R & Target Upside</span>
+        <span class="step-chip"><b>2</b> Click "Generate 20% Trade Ticket" for share counts</span>
+        <span class="step-chip"><b>3</b> Execute in terminal via <code>CHAL &lt;GO&gt;</code></span>
+      </div>
     </div>
-    <div class="guide-badge">20% Cap Enforced</div>
+    <div class="guide-badge">20% Position Cap Enforced</div>
   </div>
 
   <!-- Controls -->
@@ -669,7 +748,10 @@
       <button class="filter-btn" onclick="filterSector('Financials', this)">Financials</button>
       <button class="filter-btn" onclick="filterSector('Consumer', this)">Consumer</button>
     </div>
-    <input type="text" id="searchInput" class="search-box" placeholder="Search ticker or company..." oninput="searchStocks()">
+    <div class="search-box-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" class="search-box" placeholder="Search ticker or company..." oninput="searchStocks()">
+    </div>
   </div>
 
   <!-- Stock Cards Grid -->
@@ -700,7 +782,7 @@
       </tr>
       <tr>
         <td>Data Freshness Age</td>
-        <td id="diagDataAge">2 mins ago</td>
+        <td id="diagDataAge">5 mins ago</td>
       </tr>
       <tr>
         <td>Connection Type</td>
@@ -745,7 +827,7 @@
 
 <script>
 const stocksData = [{"symbol": "AVGO", "ticker": "AVGO US Equity", "name": "BROADCOM INC", "sector": "Information Technology", "price": 362.57, "chg_1d": 0.6747376, "chg_5d": 2.092133, "target": 529.7, "upside_pct": 46.1, "stop_loss": 337.19, "rr_ratio": 6.6, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 58, "hold_rec": 4, "sell_rec": 0, "buy_pct": 93.5, "roe": 44.2, "pe": 43.5, "market_cap": 1730774980153.05, "volume": 12447287.0, "earnings_date": "2026-12-11"}, {"symbol": "NVDA", "ticker": "NVDA US Equity", "name": "NVIDIA CORP", "sector": "Information Technology", "price": 229.785, "chg_1d": -0.3015446, "chg_5d": -1.780295, "target": 324.64, "upside_pct": 41.28, "stop_loss": 213.7, "rr_ratio": 5.9, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 79, "hold_rec": 2, "sell_rec": 1, "buy_pct": 96.3, "roe": 117.2, "pe": 33.0, "market_cap": 5537818500000.0, "volume": 64209802.0, "earnings_date": "2026-11-19"}, {"symbol": "GE", "ticker": "GE US Equity", "name": "GENERAL ELECTRIC", "sector": "Industrials", "price": 307.865, "chg_1d": 0.7345723, "chg_5d": -0.5475514, "target": 393.0, "upside_pct": 27.65, "stop_loss": 286.31, "rr_ratio": 3.9, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 21, "hold_rec": 3, "sell_rec": 2, "buy_pct": 80.8, "roe": 48.8, "pe": 42.6, "market_cap": 319429183064.745, "volume": 1844198.0, "earnings_date": "2026-10-20"}, {"symbol": "AMZN", "ticker": "AMZN US Equity", "name": "AMAZON.COM INC", "sector": "Consumer Discretionary", "price": 261.78, "chg_1d": 3.038652, "chg_5d": 4.079198, "target": 332.64, "upside_pct": 27.07, "stop_loss": 243.46, "rr_ratio": 3.9, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 77, "hold_rec": 4, "sell_rec": 0, "buy_pct": 95.1, "roe": 30.6, "pe": 36.4, "market_cap": 2823641166878.16, "volume": 24552192.0, "earnings_date": "2026-10-30"}, {"symbol": "UNH", "ticker": "UNH US Equity", "name": "UNITEDHEALTH GROUP INC", "sector": "Health Care", "price": 381.71, "chg_1d": 2.90066, "chg_5d": 2.637806, "target": 480.07, "upside_pct": 25.77, "stop_loss": 354.99, "rr_ratio": 3.7, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 25, "hold_rec": 5, "sell_rec": 0, "buy_pct": 83.3, "roe": 14.6, "pe": 21.4, "market_cap": 342620929048.37, "volume": 5250799.0, "earnings_date": "2026-10-13"}, {"symbol": "CAT", "ticker": "CAT US Equity", "name": "CATERPILLAR INC", "sector": "Industrials", "price": 802.34, "chg_1d": 0.7736944, "chg_5d": -5.095692, "target": 1007.16, "upside_pct": 25.53, "stop_loss": 746.18, "rr_ratio": 3.6, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 17, "hold_rec": 11, "sell_rec": 0, "buy_pct": 60.7, "roe": 57.0, "pe": 34.1, "market_cap": 368815550440.26, "volume": 1027301.0, "earnings_date": "2026-10-29"}, {"symbol": "LMT", "ticker": "LMT US Equity", "name": "LOCKHEED MARTIN CORP", "sector": "Industrials", "price": 509.29, "chg_1d": 0.2756502, "chg_5d": 0.7676936, "target": 634.04, "upside_pct": 24.5, "stop_loss": 473.64, "rr_ratio": 3.5, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 13, "hold_rec": 14, "sell_rec": 1, "buy_pct": 46.4, "roe": 89.2, "pe": 23.5, "market_cap": 117539422595.37, "volume": 519730.0, "earnings_date": "2026-10-22"}, {"symbol": "GS", "ticker": "GS US Equity", "name": "GOLDMAN SACHS GROUP INC", "sector": "Financials", "price": 897.14, "chg_1d": 1.648557, "chg_5d": -0.6005141, "target": 1116.0, "upside_pct": 24.4, "stop_loss": 834.34, "rr_ratio": 3.5, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 12, "hold_rec": 16, "sell_rec": 1, "buy_pct": 41.4, "roe": 18.3, "pe": 13.7, "market_cap": 271585203790.5, "volume": 1280873.0, "earnings_date": "2026-10-13"}, {"symbol": "RTX", "ticker": "RTX US Equity", "name": "RTX CORP", "sector": "Industrials", "price": 185.75, "chg_1d": 0.7758247, "chg_5d": 0.5793806, "target": 229.62, "upside_pct": 23.62, "stop_loss": 172.75, "rr_ratio": 3.4, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 20, "hold_rec": 7, "sell_rec": 1, "buy_pct": 71.4, "roe": 12.0, "pe": 26.8, "market_cap": 250346075248.0, "volume": 2282384.0, "earnings_date": "2026-10-20"}, {"symbol": "GOOGL", "ticker": "GOOGL US Equity", "name": "ALPHABET INC-CL A", "sector": "Communication Services", "price": 351.23, "chg_1d": 0.8441241, "chg_5d": 2.250364, "target": 429.25, "upside_pct": 22.21, "stop_loss": 326.64, "rr_ratio": 3.2, "signal": "STRONG BUY (CATALYST)", "badge_color": "success", "buy_rec": 64, "hold_rec": 7, "sell_rec": 0, "buy_pct": 90.1, "roe": 49.5, "pe": 34.0, "market_cap": 4274231867500.0, "volume": 11846311.0, "earnings_date": "2026-10-28"}, {"symbol": "WMT", "ticker": "WMT US Equity", "name": "WALMART INC", "sector": "Consumer Staples", "price": 111.145, "chg_1d": 0.5291245, "chg_5d": 6.603683, "target": 128.84, "upside_pct": 15.92, "stop_loss": 103.36, "rr_ratio": 2.3, "signal": "QUALIFIED BUY", "badge_color": "primary", "buy_rec": 46, "hold_rec": 5, "sell_rec": 1, "buy_pct": 88.5, "roe": 23.4, "pe": 39.3, "market_cap": 881796225955.945, "volume": 7916610.0, "earnings_date": "2026-11-19"}, {"symbol": "LLY", "ticker": "LLY US Equity", "name": "ELI LILLY & CO", "sector": "Health Care", "price": 1175.95, "chg_1d": 0.5429207, "chg_5d": 2.896268, "target": 1347.22, "upside_pct": 14.56, "stop_loss": 1093.63, "rr_ratio": 2.1, "signal": "QUALIFIED BUY", "badge_color": "primary", "buy_rec": 30, "hold_rec": 4, "sell_rec": 1, "buy_pct": 85.7, "roe": 102.4, "pe": 33.0, "market_cap": 1106988840586.75, "volume": 924530.0, "earnings_date": "2026-10-29"}, {"symbol": "MA", "ticker": "MA US Equity", "name": "MASTERCARD INC - A", "sector": "Financials", "price": 588.925, "chg_1d": 2.61984, "chg_5d": 6.639083, "target": 670.67, "upside_pct": 13.88, "stop_loss": 547.7, "rr_ratio": 2.0, "signal": "QUALIFIED BUY", "badge_color": "primary", "buy_rec": 46, "hold_rec": 3, "sell_rec": 0, "buy_pct": 93.9, "roe": 241.5, "pe": 31.1, "market_cap": 516017133286.5, "volume": 1543688.0, "earnings_date": "2026-10-29"}, {"symbol": "COST", "ticker": "COST US Equity", "name": "COSTCO WHOLESALE CORP", "sector": "Consumer Staples", "price": 946.9, "chg_1d": -0.107604, "chg_5d": 2.851246, "target": 1077.09, "upside_pct": 13.75, "stop_loss": 880.62, "rr_ratio": 2.0, "signal": "QUALIFIED BUY", "badge_color": "primary", "buy_rec": 30, "hold_rec": 13, "sell_rec": 2, "buy_pct": 66.7, "roe": 28.4, "pe": 45.6, "market_cap": 419599180568.1, "volume": 924736.0, "earnings_date": "2026-12-11"}, {"symbol": "JPM", "ticker": "JPM US Equity", "name": "JPMORGAN CHASE & CO", "sector": "Financials", "price": 333.34, "chg_1d": 0.5793253, "chg_5d": 0.288826, "target": 371.4, "upside_pct": 11.42, "stop_loss": 310.01, "rr_ratio": 1.6, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 17, "hold_rec": 16, "sell_rec": 1, "buy_pct": 50.0, "roe": 18.4, "pe": 14.2, "market_cap": 886079786241.2998, "volume": 3168300.0, "earnings_date": "2026-10-13"}, {"symbol": "META", "ticker": "META US Equity", "name": "META PLATFORMS INC-CLASS A", "sector": "Communication Services", "price": 719.36, "chg_1d": -0.2122377, "chg_5d": -1.197671, "target": 795.28, "upside_pct": 10.55, "stop_loss": 669.0, "rr_ratio": 1.5, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 72, "hold_rec": 6, "sell_rec": 1, "buy_pct": 91.1, "roe": 29.8, "pe": 21.3, "market_cap": 1832574078016.0, "volume": 9992704.0, "earnings_date": "2026-10-29"}, {"symbol": "V", "ticker": "V US Equity", "name": "VISA INC-CLASS A SHARES", "sector": "Financials", "price": 385.245, "chg_1d": 2.704612, "chg_5d": 6.816669, "target": 424.29, "upside_pct": 10.13, "stop_loss": 358.28, "rr_ratio": 1.4, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 45, "hold_rec": 3, "sell_rec": 0, "buy_pct": 93.8, "roe": 62.4, "pe": 32.4, "market_cap": 719295890683.2638, "volume": 3837920.0, "earnings_date": "2026-10-27"}, {"symbol": "JNJ", "ticker": "JNJ US Equity", "name": "JOHNSON & JOHNSON", "sector": "Health Care", "price": 260.28, "chg_1d": 1.481597, "chg_5d": 1.659962, "target": 284.2, "upside_pct": 9.19, "stop_loss": 242.06, "rr_ratio": 1.3, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 20, "hold_rec": 7, "sell_rec": 0, "buy_pct": 74.1, "roe": 25.7, "pe": 28.1, "market_cap": 627248406827.1599, "volume": 3305448.0, "earnings_date": "2026-10-13"}, {"symbol": "MSFT", "ticker": "MSFT US Equity", "name": "MICROSOFT CORP", "sector": "Information Technology", "price": 535.411, "chg_1d": 2.449436, "chg_5d": 3.455065, "target": 582.31, "upside_pct": 8.76, "stop_loss": 497.93, "rr_ratio": 1.3, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 70, "hold_rec": 2, "sell_rec": 0, "buy_pct": 97.2, "roe": 34.0, "pe": 32.3, "market_cap": 3975718736881.8, "volume": 12457020.0, "earnings_date": "2026-10-28"}, {"symbol": "AMD", "ticker": "AMD US Equity", "name": "ADVANCED MICRO DEVICES", "sector": "Information Technology", "price": 609.7431, "chg_1d": -1.762084, "chg_5d": -3.812355, "target": 648.97, "upside_pct": 6.43, "stop_loss": 567.06, "rr_ratio": 0.9, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 56, "hold_rec": 12, "sell_rec": 0, "buy_pct": 82.4, "roe": 10.1, "pe": 169.3, "market_cap": 995390392781.7102, "volume": 10939958.0, "earnings_date": "2026-11-03"}, {"symbol": "CVX", "ticker": "CVX US Equity", "name": "CHEVRON CORP", "sector": "Energy", "price": 211.69, "chg_1d": 0.06617821, "chg_5d": 2.419082, "target": 225.21, "upside_pct": 6.39, "stop_loss": 196.87, "rr_ratio": 0.9, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 25, "hold_rec": 5, "sell_rec": 1, "buy_pct": 80.6, "roe": 12.2, "pe": 20.7, "market_cap": 418251020993.06, "volume": 3943646.0, "earnings_date": "2026-10-30"}, {"symbol": "TSLA", "ticker": "TSLA US Equity", "name": "TESLA INC", "sector": "Consumer Discretionary", "price": 383.97, "chg_1d": 2.392, "chg_5d": 3.610459, "target": 397.17, "upside_pct": 3.44, "stop_loss": 357.09, "rr_ratio": 0.5, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 29, "hold_rec": 24, "sell_rec": 8, "buy_pct": 47.5, "roe": 4.6, "pe": 384.1, "market_cap": 1516507712874.18, "volume": 33777365.0, "earnings_date": "2026-10-21"}, {"symbol": "ABBV", "ticker": "ABBV US Equity", "name": "ABBVIE INC", "sector": "Health Care", "price": 276.12, "chg_1d": 1.358197, "chg_5d": 5.060498, "target": 283.17, "upside_pct": 2.55, "stop_loss": 256.79, "rr_ratio": 0.4, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 27, "hold_rec": 6, "sell_rec": 0, "buy_pct": 81.8, "roe": 0.0, "pe": 27.2, "market_cap": 487936424734.2, "volume": 2057977.0, "earnings_date": "2026-10-30"}, {"symbol": "XOM", "ticker": "XOM US Equity", "name": "EXXONMOBIL HOLDINGS CORP", "sector": "Energy", "price": 168.77, "chg_1d": 0.1602374, "chg_5d": 2.902262, "target": 172.64, "upside_pct": 2.29, "stop_loss": 156.96, "rr_ratio": 0.3, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 12, "hold_rec": 19, "sell_rec": 0, "buy_pct": 38.7, "roe": 12.6, "pe": 20.4, "market_cap": 699459764861.2001, "volume": 5493118.0, "earnings_date": "2026-11-27"}, {"symbol": "AAPL", "ticker": "AAPL US Equity", "name": "APPLE INC", "sector": "Information Technology", "price": 337.0814, "chg_1d": -0.9807297, "chg_5d": 1.016333, "target": 333.61, "upside_pct": -1.03, "stop_loss": 313.49, "rr_ratio": -0.1, "signal": "WATCHLIST", "badge_color": "secondary", "buy_rec": 33, "hold_rec": 17, "sell_rec": 6, "buy_pct": 58.9, "roe": 148.8, "pe": 38.7, "market_cap": 4919426626251.999, "volume": 29097798.0, "earnings_date": "2026-11-02"}];
-const statusMeta = {"is_live": true, "is_port_open": false, "csv_timestamp": "October 09, 2026 at 03:11 PM", "csv_mtime_epoch": 1791576719, "age_label": "2 mins ago", "connection_protocol": "Bloomberg Desktop API (BLPAPI / bbcomm.exe on 127.0.0.1:8194)", "feed_mode": "LIVE_API"};
+const statusMeta = {"is_live": true, "is_port_open": false, "csv_timestamp": "October 09, 2026 at 03:11 PM", "csv_mtime_epoch": 1791576719, "age_label": "5 mins ago", "connection_protocol": "Bloomberg Desktop API (BLPAPI / bbcomm.exe on 127.0.0.1:8194)", "feed_mode": "LIVE_API"};
 let isSimulatedLive = false;
 let currentFilter = 'ALL';
 let currentSearch = '';
@@ -848,14 +930,19 @@ function renderStocks() {
     const card = document.createElement('div');
     card.className = 'stock-card';
     card.innerHTML = `
-      <div class="card-top">
-        <div class="ticker-name">
-          <h2>${s.symbol} <span class="sector-tag">${s.sector}</span></h2>
-          <div class="company-title">${s.name}</div>
+      <!-- Clean 2-Row Header (Zero Overflow) -->
+      <div class="card-header">
+        <div class="header-main-row">
+          <div class="ticker-symbol">${s.symbol}</div>
+          <span class="signal-pill ${s.badge_color}">${s.signal}</span>
         </div>
-        <span class="signal-pill ${s.badge_color}">${s.signal}</span>
+        <div class="header-sub-row">
+          <div class="company-title" title="${s.name}">${s.name}</div>
+          <span class="sector-tag">${s.sector}</span>
+        </div>
       </div>
 
+      <!-- Price Row -->
       <div class="price-row">
         <div class="current-price">$${s.price.toFixed(2)}</div>
         <div class="price-tag-group">
@@ -866,9 +953,10 @@ function renderStocks() {
         </div>
       </div>
 
+      <!-- Institutional Metrics Box -->
       <div class="metric-rows">
         <div class="metric-row">
-          <span class="label">Wall St Target Price:</span>
+          <span class="label">Wall St Target:</span>
           <span class="val val-highlight">$${s.target.toFixed(2)} (+${s.upside_pct}%)</span>
         </div>
         <div class="metric-row">
@@ -884,15 +972,16 @@ function renderStocks() {
           <span class="val" style="color: #ffffff;">BUY ${sharesToBuy.toLocaleString()} SHARES</span>
         </div>
         <div class="metric-row">
-          <span class="label">Analyst Consensus:</span>
+          <span class="label">Analyst Buy Skew:</span>
           <span class="val">${s.buy_pct}% Buy (${s.buy_rec} Buy / ${s.sell_rec} Sell)</span>
         </div>
         <div class="metric-row">
-          <span class="label">Catalyst (Earnings Date):</span>
+          <span class="label">Catalyst (Earnings):</span>
           <span class="val" style="color: var(--accent-gold);">${s.earnings_date}</span>
         </div>
       </div>
 
+      <!-- 1-Click Competition Order Generator -->
       <button class="trade-btn" onclick="openModal('${s.symbol}')">
         ⚡ Generate 20% Trade Ticket
       </button>
@@ -956,9 +1045,9 @@ Catalyst Date: ${stock.earnings_date}
     <div class="ticket-line"><span>Quantity:</span><span style="color: var(--accent-cyan); font-weight: 700;">${shares.toLocaleString()} Shares</span></div>
     <div class="ticket-line"><span>Total Position Value:</span><span>$${Number(totalSpend).toLocaleString()}</span></div>
     <div class="ticket-line"><span>Wall St Target:</span><span style="color: var(--accent-green);">$${stock.target.toFixed(2)} (+${stock.upside_pct}%)</span></div>
-    <div class="ticket-line"><span>Strict 7% Stop-Loss:</span><span style="color: var(--accent-red);">$${stock.stop_loss.toFixed(2)}</span></div>
+    <div class="ticket-line"><span>Strict 7% Stop-Loss:</span><span style="color: #ff3366;">$${stock.stop_loss.toFixed(2)}</span></div>
     <div class="ticket-line"><span>Upside Payoff:</span><span style="color: var(--accent-green);">+$${Number(potentialProfit).toLocaleString()}</span></div>
-    <div class="ticket-line"><span>Downside Risk:</span><span style="color: var(--accent-red);">-$${Number(maxLoss).toLocaleString()}</span></div>
+    <div class="ticket-line"><span>Downside Risk:</span><span style="color: #ff3366;">-$${Number(maxLoss).toLocaleString()}</span></div>
     <div class="ticket-line"><span>Upcoming Catalyst:</span><span style="color: var(--accent-gold);">${stock.earnings_date}</span></div>
   `;
 
