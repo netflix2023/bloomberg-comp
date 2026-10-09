@@ -503,24 +503,31 @@ def main():
     logger.info("STARTING BLOOMBERG LIVE REMOTE EXCEL SYNC ENGINE")
     logger.info("=" * 80)
 
-    tickers = get_screener_tickers()
-    df = fetch_bloomberg_data(tickers)
-
     script_dir = os.path.dirname(os.path.abspath(__file__))
     xlsx_path = os.path.join(script_dir, "bloomberg_live_remote_dashboard.xlsx")
     csv_path = os.path.join(script_dir, "bloomberg_live_remote_screener.csv")
 
-    # Export CSV backup
-    df.to_csv(csv_path, index=False)
-    logger.info(f"Exported raw screener data to CSV: {csv_path}")
+    tickers = get_screener_tickers()
+    try:
+        df = fetch_bloomberg_data(tickers)
+        df.to_csv(csv_path, index=False)
+        logger.info(f"Exported raw screener data to CSV: {csv_path}")
+        build_excel_workbook(df, xlsx_path)
+        print("\n" + "=" * 90)
+        print("BLOOMBERG REMOTE EXCEL DASHBOARD UPDATED WITH LIVE DATA!")
+        print(f"File location: {xlsx_path}")
+        print("=" * 90 + "\n")
+    except Exception as e:
+        logger.warning(f"Bloomberg API at 127.0.0.1:8194 is currently unreachable: {e}")
+        logger.info("Preserving cached offline snapshot data in CSV & Excel.")
+        if os.path.exists(xlsx_path):
+            print("\n" + "=" * 90)
+            print("RUNNING IN OFFLINE MODE: Using cached market-close snapshot.")
+            print(f"File location: {xlsx_path}")
+            print("=" * 90 + "\n")
+        else:
+            raise
 
-    # Build Excel Workbook
-    build_excel_workbook(df, xlsx_path)
-
-    print("\n" + "=" * 90)
-    print("BLOOMBERG REMOTE EXCEL DASHBOARD READY!")
-    print(f"File location: {xlsx_path}")
-    print("=" * 90 + "\n")
     return xlsx_path
 
 if __name__ == "__main__":

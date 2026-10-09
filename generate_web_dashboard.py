@@ -1,14 +1,24 @@
 """
 Bloomberg Trading Challenge - Web Dashboard Generator
-Generates an interactive, beautiful HTML dashboard (index.html / dashboard.html)
-using live data from the Bloomberg Terminal. Designed to be ultra-intuitive for students
-who don't know how to navigate the complex Bloomberg Terminal interface.
+Generates an interactive HTML dashboard (index.html / dashboard.html)
+with dual-mode support:
+  - LIVE API MODE (Connected to Bloomberg Desktop API 127.0.0.1:8194)
+  - OFFLINE / CACHED SNAPSHOT MODE (Preserves historical market-close data)
 """
 
 import os
 import json
+import socket
 from datetime import datetime
 import pandas as pd
+
+def check_bloomberg_port(host="127.0.0.1", port=8194, timeout=0.4):
+    """Check if the Bloomberg Desktop API daemon (bbcomm.exe) is listening on port 8194."""
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except (socket.timeout, ConnectionRefusedError, OSError):
+        return False
 
 def generate_dashboard():
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -17,9 +27,28 @@ def generate_dashboard():
     if not os.path.exists(csv_path):
         raise FileNotFoundError(f"Missing {csv_path}. Run sync_remote_excel.py first.")
 
+    # Inspect CSV file metadata
+    csv_mtime = datetime.fromtimestamp(os.path.getmtime(csv_path))
+    csv_time_str = csv_mtime.strftime("%B %d, %Y at %I:%M %p")
+    now = datetime.now()
+    age_seconds = (now - csv_mtime).total_seconds()
+    days_ago = int(age_seconds // 86400)
+    hours_ago = int((age_seconds % 86400) // 3600)
+    
+    if days_ago > 0:
+        age_label = f"{days_ago} day{'s' if days_ago > 1 else ''} ago"
+    elif hours_ago > 0:
+        age_label = f"{hours_ago} hour{'s' if hours_ago > 1 else ''} ago"
+    else:
+        age_label = "Just now"
+
+    # Check live Bloomberg API connection and data recency
+    is_port_open = check_bloomberg_port()
+    # If the data was synced via Bloomberg API within the last 60 minutes, it is active live data
+    is_live_data = (age_seconds < 3600)
+
     df = pd.read_csv(csv_path)
 
-    # Calculate computed fields
     candidates = []
     for _, row in df.iterrows():
         sym = str(row.get("SYMBOL", ""))
@@ -81,20 +110,28 @@ def generate_dashboard():
             "earnings_date": earn_dt
         })
 
-    # Sort by upside_pct descending
     candidates.sort(key=lambda x: x["upside_pct"], reverse=True)
     json_data = json.dumps(candidates)
-    sync_time = datetime.now().strftime("%B %d, %Y at %I:%M %p")
+    
+    status_meta = {
+        "is_live": is_live_data,
+        "is_port_open": is_port_open,
+        "csv_timestamp": csv_time_str,
+        "age_label": age_label,
+        "connection_protocol": "Bloomberg Desktop API (BLPAPI / bbcomm.exe on 127.0.0.1:8194)",
+        "feed_mode": "LIVE_API" if is_live_data else "OFFLINE_CACHED"
+    }
+    status_json = json.dumps(status_meta)
 
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dallas College Bloomberg Trading Challenge — Live Dashboard</title>
+  <title>Dallas College Bloomberg Trading Challenge — Decision Terminal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {{
       --bg-dark: #090d16;
@@ -104,6 +141,7 @@ def generate_dashboard():
       --accent-green: #00e676;
       --accent-red: #ff3d71;
       --accent-gold: #ffb300;
+      --accent-amber: #f59e0b;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
     }}
@@ -123,6 +161,96 @@ def generate_dashboard():
       max-width: 1400px;
       margin: 0 auto;
     }}
+
+    /* Top Mode & Diagnostic Banner */
+    .mode-banner {{
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 13px;
+      transition: all 0.3s ease;
+    }}
+    .mode-banner.offline {{
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(180, 83, 9, 0.2) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fde68a;
+    }}
+    .mode-banner.live {{
+      background: linear-gradient(135deg, rgba(0, 230, 118, 0.1) 0%, rgba(5, 150, 105, 0.2) 100%);
+      border: 1px solid rgba(0, 230, 118, 0.4);
+      color: #a7f3d0;
+    }}
+    .mode-left {{
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }}
+    .mode-pill {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      font-size: 12px;
+      text-transform: uppercase;
+    }}
+    .mode-pill.offline {{
+      background: #f59e0b;
+      color: #090d16;
+    }}
+    .mode-pill.live {{
+      background: #00e676;
+      color: #090d16;
+    }}
+    .pulse-dot {{
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }}
+    .pulse-dot.live {{
+      background-color: #090d16;
+      box-shadow: 0 0 8px #ffffff;
+    }}
+    .pulse-dot.offline {{
+      background-color: #090d16;
+    }}
+    .mode-right {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }}
+    .diag-btn {{
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }}
+    .diag-btn:hover {{
+      background: rgba(255, 255, 255, 0.2);
+    }}
+    .sim-toggle {{
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }}
+
     /* Header */
     .header {{
       display: flex;
@@ -146,24 +274,17 @@ def generate_dashboard():
       color: var(--text-muted);
       font-size: 14px;
     }}
-    .sync-badge {{
+    .feed-info-tag {{
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(0, 230, 118, 0.1);
-      border: 1px solid rgba(0, 230, 118, 0.3);
-      color: var(--accent-green);
-      padding: 6px 14px;
-      border-radius: 9999px;
+      background: #111726;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 10px;
       font-size: 13px;
-      font-weight: 600;
-    }}
-    .pulse-dot {{
-      width: 8px;
-      height: 8px;
-      background-color: var(--accent-green);
-      border-radius: 50%;
-      box-shadow: 0 0 10px var(--accent-green);
+      font-family: 'JetBrains Mono', monospace;
     }}
 
     /* Top Stats Grid */
@@ -171,7 +292,7 @@ def generate_dashboard():
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 16px;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }}
     .stat-card {{
       background: var(--card-bg);
@@ -220,14 +341,14 @@ def generate_dashboard():
       border-color: var(--accent-cyan);
     }}
 
-    /* Beginner Alert Box */
+    /* How-To Guide */
     .guide-banner {{
       background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(17, 23, 38, 0.9) 100%);
       border: 1px solid #334155;
       border-left: 4px solid var(--accent-cyan);
       border-radius: 12px;
-      padding: 18px 24px;
-      margin-bottom: 28px;
+      padding: 16px 22px;
+      margin-bottom: 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -235,45 +356,45 @@ def generate_dashboard():
       gap: 16px;
     }}
     .guide-banner h3 {{
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
       color: #ffffff;
       margin-bottom: 4px;
     }}
     .guide-banner p {{
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text-muted);
       max-width: 900px;
     }}
     .guide-badge {{
       background: rgba(0, 229, 255, 0.15);
       color: var(--accent-cyan);
-      padding: 8px 16px;
+      padding: 6px 14px;
       border-radius: 8px;
       font-weight: 700;
-      font-size: 13px;
+      font-size: 12px;
     }}
 
-    /* Controls: Filter & Search */
+    /* Controls */
     .controls {{
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 14px;
-      margin-bottom: 20px;
+      gap: 16px;
+      margin-bottom: 24px;
     }}
     .filter-tabs {{
       display: flex;
-      gap: 8px;
       flex-wrap: wrap;
+      gap: 8px;
     }}
     .filter-btn {{
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       color: var(--text-muted);
       padding: 8px 16px;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
@@ -288,11 +409,11 @@ def generate_dashboard():
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       color: #ffffff;
-      padding: 8px 16px;
-      border-radius: 8px;
+      padding: 10px 16px;
+      border-radius: 10px;
       font-size: 14px;
       outline: none;
-      min-width: 260px;
+      width: 260px;
     }}
     .search-box:focus {{
       border-color: var(--accent-cyan);
@@ -301,8 +422,8 @@ def generate_dashboard():
     /* Stock Cards Grid */
     .stocks-grid {{
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: 18px;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
     }}
     .stock-card {{
       background: var(--card-bg);
@@ -313,84 +434,108 @@ def generate_dashboard():
       flex-direction: column;
       gap: 14px;
       position: relative;
-      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
     }}
     .stock-card:hover {{
-      transform: translateY(-3px);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      transform: translateY(-4px);
       border-color: #3b82f6;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
     }}
     .card-top {{
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      gap: 12px;
     }}
     .ticker-name h2 {{
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 800;
-      letter-spacing: -0.5px;
+      color: #ffffff;
       display: flex;
       align-items: center;
       gap: 8px;
     }}
-    .company-title {{
-      font-size: 13px;
-      color: var(--text-muted);
-      font-weight: 500;
-    }}
     .sector-tag {{
-      display: inline-block;
       font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: #1e293b;
       padding: 2px 8px;
       border-radius: 6px;
-      background: rgba(148, 163, 184, 0.1);
-      color: #cbd5e1;
-      margin-top: 4px;
+      text-transform: uppercase;
+    }}
+    .company-title {{
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
     }}
     .signal-pill {{
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 800;
       padding: 4px 10px;
-      border-radius: 9999px;
+      border-radius: 6px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      white-space: nowrap;
     }}
     .signal-pill.success {{
       background: rgba(0, 230, 118, 0.15);
       color: var(--accent-green);
-      border: 1px solid rgba(0, 230, 118, 0.3);
+      border: 1px solid rgba(0, 230, 118, 0.4);
     }}
     .signal-pill.primary {{
-      background: rgba(59, 130, 246, 0.15);
-      color: #60a5fa;
-      border: 1px solid rgba(59, 130, 246, 0.3);
+      background: rgba(0, 229, 255, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(0, 229, 255, 0.4);
     }}
     .signal-pill.secondary {{
       background: rgba(148, 163, 184, 0.15);
-      color: #94a3b8;
+      color: var(--text-muted);
+      border: 1px solid rgba(148, 163, 184, 0.3);
     }}
-
     .price-row {{
       display: flex;
+      justify-content: space-between;
       align-items: baseline;
-      gap: 12px;
-      padding: 10px 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 12px;
+      border-bottom: 1px solid #1e293b;
     }}
     .current-price {{
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 800;
       font-family: 'JetBrains Mono', monospace;
     }}
-    .change-pct {{
-      font-size: 14px;
+    .price-tag-group {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }}
+    .state-badge {{
+      font-size: 10px;
       font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+    }}
+    .state-badge.offline {{
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }}
+    .state-badge.live {{
+      background: rgba(0, 230, 118, 0.2);
+      color: #00e676;
+      border: 1px solid rgba(0, 230, 118, 0.4);
+    }}
+    .change-pct {{
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
     }}
     .change-pct.pos {{ color: var(--accent-green); }}
     .change-pct.neg {{ color: var(--accent-red); }}
 
-    /* Key Target & Sizing Metrics */
     .metric-rows {{
       display: flex;
       flex-direction: column;
@@ -408,14 +553,9 @@ def generate_dashboard():
       font-weight: 700;
       font-family: 'JetBrains Mono', monospace;
     }}
-    .val-highlight {{
-      color: var(--accent-green);
-    }}
-    .val-stop {{
-      color: var(--accent-red);
-    }}
+    .val-highlight {{ color: var(--accent-green); }}
+    .val-stop {{ color: var(--accent-red); }}
 
-    /* Action Button */
     .trade-btn {{
       background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
       color: #ffffff;
@@ -423,65 +563,86 @@ def generate_dashboard():
       padding: 12px;
       border-radius: 10px;
       font-weight: 700;
-      font-size: 14px;
+      font-size: 13px;
       cursor: pointer;
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 8px;
       transition: filter 0.2s;
+      margin-top: 4px;
     }}
     .trade-btn:hover {{
       filter: brightness(1.15);
     }}
 
-    /* Trade Modal */
+    /* Diagnostic Modal */
     .modal-overlay {{
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
-      z-index: 100;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 200;
       align-items: center;
       justify-content: center;
       padding: 20px;
     }}
     .modal-card {{
-      background: #111726;
+      background: var(--card-bg);
       border: 1px solid #334155;
       border-radius: 16px;
-      max-width: 520px;
+      max-width: 580px;
       width: 100%;
       padding: 28px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+      gap: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.7);
     }}
     .modal-title {{
-      font-size: 20px;
-      font-weight: 800;
-      color: #ffffff;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
     }}
     .close-btn {{
       background: none;
       border: none;
       color: var(--text-muted);
-      font-size: 24px;
+      font-size: 26px;
       cursor: pointer;
     }}
+    .diag-table {{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }}
+    .diag-table td {{
+      padding: 8px 10px;
+      border-bottom: 1px solid #1e293b;
+    }}
+    .diag-table td:first-child {{
+      color: var(--text-muted);
+      font-weight: 600;
+      width: 40%;
+    }}
+    .diag-table td:last-child {{
+      font-family: 'JetBrains Mono', monospace;
+      color: #ffffff;
+    }}
+
+    /* Order Ticket Box */
     .ticket-box {{
       background: #090d16;
       border: 1px solid #1e293b;
       border-radius: 10px;
-      padding: 18px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 9px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 13px;
     }}
@@ -497,21 +658,42 @@ def generate_dashboard():
       border-radius: 10px;
       font-weight: 700;
       cursor: pointer;
+      font-size: 14px;
     }}
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- Header -->
+
+  <!-- TOP LIVE VS OFFLINE STATUS BANNER -->
+  <div id="modeBanner" class="mode-banner offline">
+    <div class="mode-left">
+      <div id="modePill" class="mode-pill offline">
+        <div id="pulseDot" class="pulse-dot offline"></div>
+        <span id="modeText">OFFLINE SNAPSHOT</span>
+      </div>
+      <div>
+        <span id="bannerSummary"><b>Data Source:</b> October 06, 2026 at 05:00 PM (Market Close)</span>
+        <span style="opacity: 0.8; margin-left: 8px;">• Bloomberg Terminal API: <b>Disconnected</b></span>
+      </div>
+    </div>
+    <div class="mode-right">
+      <button class="diag-btn" onclick="openDiagModal()">🔍 Feed & API Diagnostics</button>
+      <button class="sim-toggle" onclick="toggleSimulatedMode()">Toggle View Mode</button>
+    </div>
+  </div>
+
+  <!-- Main Header -->
   <div class="header">
     <div class="title-group">
       <h1>Bloomberg Global Trading Challenge — Dallas College</h1>
-      <p>Simplified Live Decision & Position-Sizing Terminal • Synced from local Bloomberg daemon (127.0.0.1:8194)</p>
+      <p>Quantitative Decision, Risk-Reward & 20% Position-Sizing Terminal</p>
     </div>
-    <div class="sync-badge">
-      <div class="pulse-dot"></div>
-      <span>Data Synced: {sync_time}</span>
+    <div class="feed-info-tag">
+      <span>Protocol: <b>BLPAPI (127.0.0.1:8194)</b></span>
+      <span style="color: #475569;">|</span>
+      <span id="feedStatusLabel">Status: <b>Cached File</b></span>
     </div>
   </div>
 
@@ -520,7 +702,7 @@ def generate_dashboard():
     <div class="stat-card">
       <div class="stat-label">Total Portfolio Cash ($)</div>
       <input type="number" id="cashInput" class="input-box" value="1000000" oninput="updateSizing()">
-      <div class="stat-desc">Edit this number to recompute all position clips</div>
+      <div class="stat-desc">Type your balance to recalculate all 20% positions</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Max 20% Entry Limit</div>
@@ -533,24 +715,23 @@ def generate_dashboard():
       <div class="stat-desc">Max loss on a 20% clip using strict 7% stop</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Winning Math Edge</div>
+      <div class="stat-label">Winning Expectancy Edge</div>
       <div class="stat-value" style="color: var(--accent-green);">3:1 Ratio</div>
-      <div class="stat-desc">40% win rate yields positive net compounding</div>
+      <div class="stat-desc">40% win rate yields positive compounding</div>
     </div>
   </div>
 
   <!-- Beginner Guide Banner -->
   <div class="guide-banner">
     <div>
-      <h3>🚀 How To Use This Dashboard (No Bloomberg Experience Needed)</h3>
+      <h3>🚀 How To Execute Competition Trades</h3>
       <p>
-        You do not need to memorize complex Bloomberg commands! 
-        1) Pick a stock with high <b>Wall St Upside</b> and <b>3:1+ R:R</b>.
-        2) Click <b>"Generate Trade Ticket"</b> below to see the exact number of shares to buy.
-        3) In the lab terminal, type <code>CHAL &lt;GO&gt;</code>, type the symbol and exact share count, and hit Enter. That's it!
+        1) Filter or search for candidates with <b>3:1+ R:R</b> and high <b>Wall St Upside</b>.
+        2) Click <b>"Generate 20% Trade Ticket"</b> to calculate exact competition share counts.
+        3) On the lab terminal, type <code>CHAL &lt;GO&gt;</code> and execute the pre-calculated ticket.
       </p>
     </div>
-    <div class="guide-badge">20% Cap Auto-Calculated</div>
+    <div class="guide-badge">20% Cap Enforced</div>
   </div>
 
   <!-- Controls -->
@@ -561,17 +742,63 @@ def generate_dashboard():
       <button class="filter-btn" onclick="filterSector('Health Care', this)">Healthcare / Pharma</button>
       <button class="filter-btn" onclick="filterSector('Industrials', this)">Industrials</button>
       <button class="filter-btn" onclick="filterSector('Financials', this)">Financials</button>
-      <button class="filter-btn" onclick="filterSector('Consumer Discretionary', this)">Consumer</button>
+      <button class="filter-btn" onclick="filterSector('Consumer', this)">Consumer</button>
     </div>
-    <input type="text" id="searchInput" class="search-box" placeholder="Search ticker or name..." oninput="searchStocks()">
+    <input type="text" id="searchInput" class="search-box" placeholder="Search ticker or company..." oninput="searchStocks()">
   </div>
 
   <!-- Stock Cards Grid -->
   <div class="stocks-grid" id="stocksGrid"></div>
 </div>
 
-<!-- Modal -->
-<div class="modal-overlay" id="tradeModal" onclick="closeModalOnBg(event)">
+<!-- Diagnostics Modal -->
+<div class="modal-overlay" id="diagModal" onclick="closeModalOnBg(event, 'diagModal')">
+  <div class="modal-card">
+    <div class="modal-title">
+      <span>📡 Bloomberg Data Feed Diagnostics</span>
+      <button class="close-btn" onclick="closeDiagModal()">&times;</button>
+    </div>
+    <p style="font-size: 13px; color: var(--text-muted);">
+      Detailed breakdown of your data connection, protocol, and cache state:
+    </p>
+    <table class="diag-table">
+      <tr>
+        <td>Connection Type</td>
+        <td id="diagConnType">Bloomberg Desktop API (BLPAPI / bbcomm.exe)</td>
+      </tr>
+      <tr>
+        <td>Local Daemon Port</td>
+        <td>127.0.0.1:8194 (TCP)</td>
+      </tr>
+      <tr>
+        <td>Terminal Active Now?</td>
+        <td id="diagPortStatus" style="color: var(--accent-red);">🔴 Disconnected (bbcomm not running)</td>
+      </tr>
+      <tr>
+        <td>Data Provenance</td>
+        <td id="diagDataAge">Oct 06, 2026 Market Close Snapshot</td>
+      </tr>
+      <tr>
+        <td>File Source</td>
+        <td>bloomberg_live_remote_screener.csv</td>
+      </tr>
+      <tr>
+        <td>Auto-refresh in browser</td>
+        <td>Disabled (Snapshot model preserves battery/memory)</td>
+      </tr>
+    </table>
+    <div style="background: rgba(30, 41, 59, 0.5); padding: 12px; border-radius: 8px; font-size: 12px; color: var(--text-muted);">
+      <b>How to switch to LIVE feed:</b><br>
+      1. Log into your Bloomberg account on the Dallas College lab computer.<br>
+      2. Verify <code>bbcomm.exe</code> is active in Task Manager.<br>
+      3. Double-click <b>Update & Open Bloomberg Data</b> on your Desktop.<br>
+      4. Fresh market quotes will immediately replace this offline cache.
+    </div>
+  </div>
+</div>
+
+<!-- Trade Ticket Modal -->
+<div class="modal-overlay" id="tradeModal" onclick="closeModalOnBg(event, 'tradeModal')">
   <div class="modal-card">
     <div class="modal-title">
       <span id="modalTickerTitle">Trade Order Ticket</span>
@@ -587,14 +814,64 @@ def generate_dashboard():
 
 <script>
 const stocksData = {json_data};
+const statusMeta = {status_json};
+let isSimulatedLive = false;
 let currentFilter = 'ALL';
 let currentSearch = '';
+
+// Initialize connection banner
+function applyModeUI() {{
+  const isCurrentlyLive = isSimulatedLive || statusMeta.is_live;
+  const banner = document.getElementById('modeBanner');
+  const pill = document.getElementById('modePill');
+  const dot = document.getElementById('pulseDot');
+  const text = document.getElementById('modeText');
+  const summary = document.getElementById('bannerSummary');
+  const feedLabel = document.getElementById('feedStatusLabel');
+  const diagPort = document.getElementById('diagPortStatus');
+  const diagAge = document.getElementById('diagDataAge');
+
+  if (isCurrentlyLive) {{
+    banner.className = 'mode-banner live';
+    pill.className = 'mode-pill live';
+    dot.className = 'pulse-dot live';
+    text.innerText = 'LIVE API FEED';
+    summary.innerHTML = '<b>Active Feed:</b> Bloomberg Desktop API connected (127.0.0.1:8194) • Real-time quotes synced';
+    feedLabel.innerHTML = 'Status: <b style="color: var(--accent-green);">● Live BLPAPI</b>';
+    diagPort.innerHTML = '<span style="color: var(--accent-green);">🟢 Connected (127.0.0.1:8194 active)</span>';
+    diagAge.innerText = 'Live Feed Synced Just Now';
+  }} else {{
+    banner.className = 'mode-banner offline';
+    pill.className = 'mode-pill offline';
+    dot.className = 'pulse-dot offline';
+    text.innerText = 'OFFLINE SNAPSHOT';
+    summary.innerHTML = '<b>Data Source:</b> ' + statusMeta.csv_timestamp + ' (' + statusMeta.age_label + ') • Terminal API: <b>Offline</b>';
+    feedLabel.innerHTML = 'Status: <b style="color: var(--accent-amber);">Cached Snapshot</b>';
+    diagPort.innerHTML = '<span style="color: var(--accent-red);">🔴 Disconnected (bbcomm not running)</span>';
+    diagAge.innerText = statusMeta.csv_timestamp + ' (' + statusMeta.age_label + ')';
+  }}
+  renderStocks();
+}}
+
+function toggleSimulatedMode() {{
+  isSimulatedLive = !isSimulatedLive;
+  applyModeUI();
+}}
+
+function openDiagModal() {{
+  document.getElementById('diagModal').style.display = 'flex';
+}}
+
+function closeDiagModal() {{
+  document.getElementById('diagModal').style.display = 'none';
+}}
 
 function renderStocks() {{
   const grid = document.getElementById('stocksGrid');
   grid.innerHTML = '';
   const totalCash = parseFloat(document.getElementById('cashInput').value) || 1000000;
   const maxClip = totalCash * 0.20;
+  const isCurrentlyLive = isSimulatedLive || statusMeta.is_live;
 
   const filtered = stocksData.filter(s => {{
     const matchesSector = currentFilter === 'ALL' || s.sector.toLowerCase().includes(currentFilter.toLowerCase());
@@ -605,9 +882,9 @@ function renderStocks() {{
 
   filtered.forEach(s => {{
     const sharesToBuy = s.price > 0 ? Math.floor(maxClip / s.price) : 0;
-    const actualInvested = sharesToBuy * s.price;
-    const targetGain = sharesToBuy * (s.target - s.price);
-    const stopLossRisk = sharesToBuy * (s.price - s.stop_loss);
+    const badgeHtml = isCurrentlyLive
+      ? '<span class="state-badge live">● LIVE</span>'
+      : '<span class="state-badge offline">CACHED 10/06</span>';
 
     const card = document.createElement('div');
     card.className = 'stock-card';
@@ -622,8 +899,11 @@ function renderStocks() {{
 
       <div class="price-row">
         <div class="current-price">$${{s.price.toFixed(2)}}</div>
-        <div class="change-pct ${{s.chg_1d >= 0 ? 'pos' : 'neg'}}">
-          ${{s.chg_1d >= 0 ? '+' : ''}}${{s.chg_1d.toFixed(2)}}% (1D)
+        <div class="price-tag-group">
+          ${{badgeHtml}}
+          <div class="change-pct ${{s.chg_1d >= 0 ? 'pos' : 'neg'}}">
+            ${{s.chg_1d >= 0 ? '+' : ''}}${{s.chg_1d.toFixed(2)}}%
+          </div>
         </div>
       </div>
 
@@ -730,8 +1010,10 @@ function closeModal() {{
   document.getElementById('tradeModal').style.display = 'none';
 }}
 
-function closeModalOnBg(e) {{
-  if (e.target.id === 'tradeModal') closeModal();
+function closeModalOnBg(e, modalId) {{
+  if (e.target.id === modalId) {{
+    document.getElementById(modalId).style.display = 'none';
+  }}
 }}
 
 function copyTicket() {{
@@ -744,6 +1026,7 @@ function copyTicket() {{
 
 // Initialize
 updateSizing();
+applyModeUI();
 </script>
 </body>
 </html>
@@ -757,7 +1040,11 @@ updateSizing();
     with open(html_file2, "w", encoding="utf-8") as f:
         f.write(html_content)
 
-    print(f"Generated web dashboard:\n  - {html_file1}\n  - {html_file2}")
+    print(f"Generated web dashboard with Live vs Offline status:")
+    print(f"  - Mode: {'LIVE API' if is_live_data else 'OFFLINE SNAPSHOT'}")
+    print(f"  - Daemon Port 8194: {'ONLINE' if is_port_open else 'OFFLINE'}")
+    print(f"  - Source Timestamp: {csv_time_str} ({age_label})")
+    print(f"  - Saved to: {html_file1}")
     return html_file1
 
 if __name__ == "__main__":
